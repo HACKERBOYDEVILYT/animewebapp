@@ -3,20 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HiStream | Zoro Edition</title>
+    <title>HiStream | Ultimate Stable</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/artplayer/dist/artplayer.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { background-color: #0b0e11; color: white; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .zoro-card { cursor: pointer; transition: 0.3s; border-radius: 8px; overflow: hidden; background: #1a1f26; }
-        .zoro-card:hover { transform: scale(1.05); border: 1px solid #ff5c00; }
-        .zoro-card img { width: 100%; height: 250px; object-fit: cover; }
-        #player-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; }
-        .ep-btn { background: #1a1f26; padding: 10px; border-radius: 5px; font-weight: bold; border: 1px solid #333; transition: 0.2s; font-size: 13px; }
+        body { background-color: #06090f; color: white; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .anime-card { cursor: pointer; transition: 0.3s; background: #111827; border-radius: 10px; overflow: hidden; }
+        .anime-card:hover { transform: scale(1.05); border: 1px solid #ff5c00; }
+        .anime-card img { width: 100%; height: 260px; object-fit: cover; }
+        #player-box { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        iframe { width: 100%; height: 100%; border: none; }
+        .ep-btn { background: #1a1f26; padding: 10px; border-radius: 6px; font-weight: bold; border: 1px solid #333; cursor: pointer; font-size: 13px; transition: 0.2s; }
         .active-ep, .ep-btn:hover { background: #ff5c00; border-color: white; }
-        .lang-active { background: #ff5c00 !important; color: white !important; border-color: white !important; }
+        .lang-btn { background: #1f2937; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; border: 1px solid #444; }
+        .lang-active { background: #ff5c00; border-color: white; }
+        .loading { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #ff5c00; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .hidden { display: none; }
     </style>
 </head>
@@ -24,9 +26,9 @@
 
     <!-- Navbar -->
     <nav class="p-4 flex flex-col md:flex-row justify-between items-center glass sticky top-0 z-50 gap-4">
-        <h1 class="text-3xl font-black text-[#ff5c00] tracking-tighter cursor-pointer" onclick="navigateHome()">HI<span class="text-white">STREAM</span></h1>
+        <h1 class="text-3xl font-black text-[#ff5c00] cursor-pointer" onclick="navigateHome()">HI<span class="text-white">STREAM</span></h1>
         <div class="flex w-full md:w-[500px]">
-            <input id="searchInp" type="text" placeholder="Search anime like Zoro..." class="bg-[#1a1f26] px-5 py-3 rounded-l-xl outline-none w-full border border-gray-800 focus:border-[#ff5c00]">
+            <input id="searchInp" type="text" placeholder="Search anime..." class="bg-[#111827] px-5 py-3 rounded-l-xl outline-none w-full border border-gray-800 focus:border-[#ff5c00]">
             <button onclick="searchAnime()" class="bg-[#ff5c00] px-8 py-3 rounded-r-xl font-bold">SEARCH</button>
         </div>
     </nav>
@@ -37,23 +39,25 @@
         <div id="watchView" class="hidden">
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 <div class="lg:col-span-3">
-                    <div id="player-container"></div>
+                    <div id="player-box">
+                        <div class="h-full flex items-center justify-center text-gray-600 italic">Connecting to server...</div>
+                    </div>
                     
                     <div class="mt-4 flex flex-wrap gap-2">
-                        <button onclick="setLang('sub')" id="l-sub" class="lang-btn bg-[#1a1f26] px-4 py-2 rounded-full text-xs font-bold border border-gray-700">SUB</button>
-                        <button onclick="setLang('dub')" id="l-dub" class="lang-btn bg-[#1a1f26] px-4 py-2 rounded-full text-xs font-bold border border-gray-700">DUB</button>
-                        <button onclick="setLang('hi')" id="l-hi" class="lang-btn bg-[#1a1f26] px-4 py-2 rounded-full text-xs font-bold border border-gray-700">HINDI</button>
-                        <button onclick="setLang('bn')" id="l-bn" class="lang-btn bg-[#1a1f26] px-4 py-2 rounded-full text-xs font-bold border border-gray-700">BANGLA</button>
+                        <button onclick="setLang('sub')" id="btn-sub" class="lang-btn lang-active">JAPANESE (SUB)</button>
+                        <button onclick="setLang('dub')" id="btn-dub" class="lang-btn">ENGLISH (DUB)</button>
+                        <button onclick="setLang('hi')" id="btn-hi" class="lang-btn">HINDI</button>
+                        <button onclick="setLang('bn')" id="btn-bn" class="lang-btn">BANGLA</button>
                     </div>
 
                     <div class="mt-6 p-6 glass rounded-2xl border-l-4 border-[#ff5c00]">
-                        <h2 id="animeTitle" class="text-2xl font-bold">Loading...</h2>
-                        <p id="animeDesc" class="text-gray-400 mt-2 text-sm leading-relaxed line-clamp-3"></p>
+                        <h2 id="detTitle" class="text-2xl font-bold">Loading Title...</h2>
+                        <p id="detDesc" class="text-gray-400 mt-2 text-sm leading-relaxed line-clamp-3"></p>
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold mb-4 text-[#ff5c00]">EPISODE LIST</h3>
-                    <div id="episodeList" class="grid grid-cols-4 gap-2 max-h-[500px] overflow-y-auto pr-2"></div>
+                    <h3 class="text-lg font-bold mb-4 text-[#ff5c00]">EPISODES</h3>
+                    <div id="epList" class="grid grid-cols-4 md:grid-cols-5 gap-2 max-h-[500px] overflow-y-auto pr-2"></div>
                 </div>
             </div>
         </div>
@@ -64,23 +68,24 @@
                 <span class="w-1.5 h-6 bg-[#ff5c00] rounded-full"></span> TRENDING NOW
             </h3>
             <div id="animeGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+            <div id="mainLoader" class="flex justify-center p-20 hidden"><div class="loading"></div></div>
         </div>
 
     </div>
 
     <script>
-        // Zoro/Aniwatch API URL
-        const API_BASE = "https://consumet-api-three-virid.vercel.app/anime/zoro"; 
+        const API_GOGO = "https://api.consumet.org/anime/gogoanime";
         const ANILIST = 'https://graphql.anilist.co';
         
+        let currentTitle = "";
         let currentLang = 'sub';
 
-        // ১. রিফ্রেশ সমস্যার স্থায়ী সমাধান
+        // ১. রিফ্রেশ সমস্যার সমাধান (URL Param)
         window.onload = () => {
-            const params = new URLSearchParams(window.location.search);
-            const animeId = params.get('id');
-            if (animeId) {
-                openAnime(animeId);
+            const urlParams = new URLSearchParams(window.location.search);
+            const animeName = urlParams.get('anime');
+            if (animeName) {
+                openAnime(decodeURIComponent(animeName));
             } else {
                 loadTrending();
             }
@@ -95,94 +100,108 @@
 
         // ২. ট্রেন্ডিং ডাটা
         async function loadTrending() {
-            const query = `query { Page(perPage: 24) { media(sort: TRENDING_DESC, type: ANIME) { id title { english romaji } coverImage { large } } } }`;
-            const res = await fetch(ANILIST, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) });
-            const { data } = await res.json();
-            
+            const query = `query { Page(perPage: 24) { media(sort: TRENDING_DESC, type: ANIME) { title { english romaji } coverImage { large } } } }`;
+            try {
+                const res = await fetch(ANILIST, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) });
+                const { data } = await res.json();
+                renderGrid(data.Page.media);
+            } catch (err) { console.error(err); }
+        }
+
+        function renderGrid(list) {
             const grid = document.getElementById('animeGrid');
             grid.innerHTML = "";
-            data.Page.media.forEach(anime => {
+            list.forEach(anime => {
                 const title = anime.title.english || anime.title.romaji;
-                // Zoro ID ফরম্যাট তৈরি করা
-                const zoroId = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                
                 grid.innerHTML += `
-                    <div class="zoro-card" onclick="updateURL('${zoroId}')">
+                    <div class="anime-card" onclick="updateURL('${title.replace(/'/g, "")}')">
                         <img src="${anime.coverImage.large}">
-                        <div class="p-2 text-[11px] font-bold truncate">${title}</div>
+                        <div class="p-2 text-[10px] font-bold truncate">${title}</div>
                     </div>`;
             });
         }
 
-        function updateURL(id) {
-            window.history.pushState({}, '', '?id=' + id);
-            openAnime(id);
+        function updateURL(title) {
+            window.history.pushState({}, '', '?anime=' + encodeURIComponent(title));
+            openAnime(title);
         }
 
-        // ৩. এনিমে ও এপিসোড লোড করা (Zoro API)
-        async function openAnime(id) {
+        // ৩. সঠিক আইডি খুঁজে এপিসোড লোড করা (মেইন ফিক্স)
+        async function openAnime(title) {
+            currentTitle = title;
             document.getElementById('homeView').classList.add('hidden');
             document.getElementById('watchView').classList.remove('hidden');
-            document.getElementById('episodeList').innerHTML = "Loading...";
+            document.getElementById('detTitle').innerText = title;
+            document.getElementById('epList').innerHTML = '<div class="loading"></div>';
+            window.scrollTo(0,0);
 
             try {
-                const res = await fetch(`${API_BASE}/info?id=${id}`);
-                const data = await res.json();
+                // নামের উপর ভিত্তি করে প্রথমে সার্চ করে সঠিক ID নিবে
+                let searchQuery = title.split(':')[0].split('Season')[0].trim();
+                if(currentLang === 'dub') searchQuery += " (Dub)";
+                
+                const searchRes = await fetch(`${API_GOGO}/${searchQuery}`);
+                const searchData = await searchRes.json();
 
-                document.getElementById('animeTitle').innerText = data.title;
-                document.getElementById('animeDesc').innerText = data.description || "";
+                if(!searchData.results.length) throw new Error("Not Found");
 
-                const epDiv = document.getElementById('episodeList');
+                const animeId = searchData.results[0].id; // সঠিক আইডি পেয়ে গেছি
+
+                const infoRes = await fetch(`${API_GOGO}/info/${animeId}`);
+                const infoData = await infoRes.json();
+
+                document.getElementById('detDesc').innerText = infoData.description || "";
+                
+                const epDiv = document.getElementById('epList');
                 epDiv.innerHTML = "";
-                data.episodes.forEach(ep => {
+                infoData.episodes.forEach(ep => {
                     epDiv.innerHTML += `<button onclick="playVideo('${ep.id}', this)" class="ep-btn">${ep.number}</button>`;
                 });
 
-                if(data.episodes.length > 0) playVideo(data.episodes[0].id, document.querySelector('.ep-btn'));
+                if(infoData.episodes.length > 0) playVideo(infoData.episodes[0].id, document.querySelector('.ep-btn'));
+
             } catch (err) {
-                document.getElementById('episodeList').innerHTML = "Episodes not found for this title.";
+                document.getElementById('epList').innerHTML = `<p class="col-span-full text-red-500 text-xs">Episodes not found. Please try searching manually or changing audio.</p>`;
             }
         }
 
-        // ৪. ভিডিও প্লেয়ার (Zoro Embed)
+        // ৪. ভিডিও প্লেয়ার
         function playVideo(epId, btn) {
             document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active-ep'));
             if(btn) btn.classList.add('active-ep');
 
-            // Zoro-এর নিজস্ব সার্ভার এম্বেড করা হচ্ছে
-            const embedUrl = `https://www.social-stream.to/embed/zoro/${epId}`;
-            document.getElementById('player-container').innerHTML = `<iframe src="${embedUrl}" allowfullscreen="true" scrolling="no"></iframe>`;
+            // Gogo-এর স্টেবল এম্বেড সার্ভার
+            const url = `https://www.social-stream.to/embed/gogoanime/${epId}`;
+            document.getElementById('player-box').innerHTML = `<iframe src="${url}" allowfullscreen="true" scrolling="no"></iframe>`;
         }
 
-        // ৫. ল্যাঙ্গুয়েজ সুইচ
+        // ৫. ল্যাঙ্গুয়েজ এবং সার্চ
         function setLang(lang) {
             currentLang = lang;
             document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('lang-active'));
-            document.getElementById('l-' + lang).classList.add('lang-active');
-            
-            // হিন্দি/বাংলার জন্য আমরা শুধু টাইটেল সার্চ চেঞ্জ করতে পারি
-            if(lang === 'hi' || lang === 'bn') {
-                alert(lang.toUpperCase() + " Dub is only available for some specific series. Searching...");
-            }
-            // বর্তমান আইডি অনুযায়ী আবার লোড করার লজিক
+            document.getElementById('btn-' + lang).classList.add('lang-active');
+            if(lang === 'hi' || lang === 'bn') alert("Hindi/Bangla Dub is limited. We are searching for available sources...");
+            openAnime(currentTitle);
         }
 
-        // ৬. সার্চ
         async function searchAnime() {
             const val = document.getElementById('searchInp').value;
             if(!val) return;
-            document.getElementById('animeGrid').innerHTML = "Searching...";
+            document.getElementById('animeGrid').innerHTML = "";
+            document.getElementById('mainLoader').classList.remove('hidden');
             
-            const res = await fetch(`${API_BASE}/${val}`);
+            const res = await fetch(`${API_GOGO}/${val}`);
             const data = await res.json();
             
+            document.getElementById('mainLoader').classList.add('hidden');
+            document.getElementById('sectionTitle').innerText = "SEARCH RESULTS";
+            
             const grid = document.getElementById('animeGrid');
-            grid.innerHTML = "";
             data.results.forEach(anime => {
                 grid.innerHTML += `
-                    <div class="zoro-card" onclick="updateURL('${anime.id}')">
+                    <div class="anime-card" onclick="updateURL('${anime.title.replace(/'/g, "")}')">
                         <img src="${anime.image}">
-                        <div class="p-2 text-[11px] font-bold truncate">${anime.title}</div>
+                        <div class="p-2 text-[10px] font-bold truncate">${anime.title}</div>
                     </div>`;
             });
         }
