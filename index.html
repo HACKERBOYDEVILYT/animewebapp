@@ -3,175 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HiAnime - 100% Working Version</title>
+    <title>MovieBox Edu - Movie Discovery Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0b0c10; color: #fff; font-family: 'Inter', sans-serif; }
-        .anime-card:hover img { transform: scale(1.05); transition: 0.3s ease-in-out; }
-        .cyan-text { color: #45f3ff; }
-        .cyan-bg { background-color: #45f3ff; }
-        .loader { border: 3px solid #1f2833; border-top: 3px solid #45f3ff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        body { background-color: #080a10; color: white; font-family: 'Inter', sans-serif; }
+        .movie-card:hover img { transform: scale(1.08); transition: 0.4s ease; }
+        .modal-bg { background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(10px); }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #e50914; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
-    <nav class="bg-[#1f2833] p-4 sticky top-0 z-50 shadow-2xl">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-black cyan-text cursor-pointer" onclick="location.reload()">Hi<span class="text-white">Anime</span></h1>
-            <div class="relative w-1/2">
-                <input id="searchInput" type="text" placeholder="Search anime..." class="w-full bg-[#0b0c10] p-2 pl-4 rounded-full outline-none border border-gray-700 focus:border-[#45f3ff] text-sm">
-                <button onclick="searchAnime()" class="absolute right-3 top-2 cyan-text"><i class="fa fa-search"></i></button>
+    <!-- Navbar -->
+    <nav class="bg-black/80 p-4 sticky top-0 z-50 border-b border-white/10 shadow-2xl">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <h1 class="text-3xl font-black text-red-600 tracking-tighter cursor-pointer" onclick="location.reload()">MOVIE<span class="text-white">BOX</span></h1>
+            <div class="relative w-full md:w-1/2">
+                <input id="searchInput" type="text" placeholder="Search for movies or actors..." class="w-full bg-[#111] p-3 pl-5 rounded-xl outline-none border border-white/10 focus:border-red-600 transition text-sm">
+                <button onclick="searchMovie()" class="absolute right-4 top-3 text-red-600"><i class="fa fa-search"></i></button>
             </div>
         </div>
     </nav>
 
-    <!-- Player Section -->
-    <div id="playerSection" class="hidden p-4 md:p-8 bg-black min-h-screen">
-        <button onclick="closePlayer()" class="mb-6 text-gray-400 hover:text-white flex items-center gap-2 font-bold">
-            <i class="fa fa-arrow-left"></i> BACK TO HOME
-        </button>
-        <div class="max-w-5xl mx-auto">
-            <div class="aspect-video bg-[#1f2833] rounded-xl overflow-hidden shadow-2xl border border-gray-800">
-                <iframe id="mainPlayer" src="" class="w-full h-full" allowfullscreen frameborder="0"></iframe>
+    <!-- Hero Section (Featured) -->
+    <header id="hero" class="h-[60vh] w-full bg-cover bg-center relative hidden md:flex items-end p-10 shadow-inner">
+        <div class="absolute inset-0 bg-gradient-to-t from-[#080a10] via-transparent to-transparent"></div>
+        <div class="relative z-10 max-w-2xl">
+            <h2 id="heroTitle" class="text-5xl font-black mb-4"></h2>
+            <p id="heroDesc" class="text-gray-300 text-sm line-clamp-3 mb-6"></p>
+            <button id="heroBtn" class="bg-red-600 hover:bg-red-700 px-8 py-3 rounded-full font-bold transition">View Details</button>
+        </div>
+    </header>
+
+    <!-- Main List -->
+    <main class="p-6 max-w-7xl mx-auto">
+        <h2 id="listTitle" class="text-xl font-bold mb-8 border-l-4 border-red-600 pl-4 uppercase tracking-widest">Trending Movies</h2>
+        
+        <!-- Loading -->
+        <div id="loader" class="hidden text-center my-20">
+            <div class="inline-block w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="mt-4 text-gray-500 font-bold">FETCHING DATA...</p>
+        </div>
+
+        <div id="movieGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            <!-- Movie cards will load here -->
+        </div>
+    </main>
+
+    <!-- Movie Details Modal -->
+    <div id="movieModal" class="fixed inset-0 z-[100] modal-bg hidden overflow-y-auto">
+        <div class="max-w-4xl mx-auto my-10 p-5 bg-[#111] rounded-3xl relative border border-white/10">
+            <button onclick="closeModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white text-2xl"><i class="fa fa-times"></i></button>
+            
+            <div id="modalContent" class="flex flex-col md:flex-row gap-8">
+                <!-- Details will load here -->
             </div>
-            <h2 id="playingTitle" class="text-2xl font-bold mt-6 cyan-text"></h2>
-            <div id="episodeList" class="flex flex-wrap gap-2 mt-6 p-4 bg-[#1f2833] rounded-xl max-h-48 overflow-y-auto">
-                <!-- Episodes -->
+
+            <div class="mt-10">
+                <h3 class="font-bold text-red-600 mb-4 tracking-widest uppercase text-xs">Official Trailer</h3>
+                <div class="aspect-video bg-black rounded-2xl overflow-hidden">
+                    <iframe id="trailerPlayer" class="w-full h-full" allowfullscreen frameborder="0"></iframe>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <main id="mainContent" class="p-6 max-w-7xl mx-auto">
-        <h2 id="listTitle" class="text-xl font-bold mb-8 border-l-4 border-[#45f3ff] pl-4 uppercase tracking-widest">Trending Anime</h2>
-        
-        <!-- Loader -->
-        <div id="loading" class="flex flex-col items-center justify-center my-32 hidden">
-            <div class="loader mb-4"></div>
-            <p class="text-gray-500 font-bold">LOADING DATA...</p>
-        </div>
-        
-        <div id="animeGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-6">
-            <!-- Anime Cards -->
-        </div>
-    </main>
-
     <script>
-        // Jikan API (MyAnimeList) - এটি ১০০% কাজ করবে সবসময়
-        const JIKAN_API = "https://api.jikan.moe/v4";
-        // Consumet API (Streaming এর জন্য)
-        const STREAM_API = "https://api-consumet-org-five.vercel.app/anime/gogoanime";
+        // আপনার TMDB API Key এখানে বসান
+        const API_KEY = '5f49df7f2945d7d3b0a68f566085a67c'; // নমুনা হিসেবে একটি কি দেওয়া হলো
+        const BASE_URL = 'https://api.themoviedb.org/3';
+        const IMG_URL = 'https://image.tmdb.org/t/p/w500';
+        const BG_URL = 'https://image.tmdb.org/t/p/original';
 
-        const animeGrid = document.getElementById('animeGrid');
-        const loading = document.getElementById('loading');
-
-        // ১. ট্রেন্ডিং এনিমে লোড করা (Jikan API ব্যবহার করে)
+        // ১. মুভি লোড করা (Trending)
         async function fetchTrending() {
-            showLoading(true);
-            try {
-                const res = await fetch(`${JIKAN_API}/top/anime?filter=airing&limit=24`);
-                const data = await res.json();
-                displayAnime(data.data);
-            } catch (err) {
-                console.error(err);
-                alert("ইন্টারনেট কানেকশন চেক করুন।");
-            }
-            showLoading(false);
+            showLoader(true);
+            const res = await fetch(`${BASE_URL}/trending/movie/week?api_key=${API_KEY}`);
+            const data = await res.json();
+            
+            // হিরো সেকশন আপডেট
+            setHero(data.results[0]);
+            renderMovies(data.results);
+            showLoader(false);
         }
 
-        // ২. এনিমে কার্ড তৈরি করা
-        function displayAnime(list) {
-            animeGrid.innerHTML = '';
-            list.forEach(anime => {
-                // Jikan API এর ডাটা ফরম্যাট একটু আলাদা হয়
-                const title = anime.title;
-                const image = anime.images.jpg.large_image_url;
-                const id = anime.mal_id;
+        function setHero(movie) {
+            const hero = document.getElementById('hero');
+            hero.style.backgroundImage = `url(${BG_URL + movie.backdrop_path})`;
+            document.getElementById('heroTitle').innerText = movie.title;
+            document.getElementById('heroDesc').innerText = movie.overview;
+            document.getElementById('heroBtn').onclick = () => loadDetails(movie.id);
+        }
 
-                const card = `
-                    <div class="anime-card cursor-pointer group" onclick="loadDetails('${id}', '${title.replace(/'/g, "")}')">
-                        <div class="relative overflow-hidden rounded-xl aspect-[3/4.5] bg-[#1f2833]">
-                            <img src="${image}" class="w-full h-full object-cover">
+        // ২. মুভি লিস্ট রেন্ডার করা
+        function renderMovies(movies) {
+            const grid = document.getElementById('movieGrid');
+            grid.innerHTML = '';
+            movies.forEach(movie => {
+                grid.innerHTML += `
+                    <div class="movie-card cursor-pointer group flex flex-col" onclick="loadDetails(${movie.id})">
+                        <div class="relative overflow-hidden rounded-2xl aspect-[2/3] bg-gray-900 shadow-xl">
+                            <img src="${IMG_URL + movie.poster_path}" class="w-full h-full object-cover" loading="lazy">
+                            <div class="absolute top-2 right-2 bg-black/70 backdrop-blur text-yellow-500 text-[10px] font-bold px-2 py-1 rounded">
+                                <i class="fa fa-star"></i> ${movie.vote_average.toFixed(1)}
+                            </div>
                         </div>
-                        <h3 class="mt-3 text-xs font-bold group-hover:cyan-text transition line-clamp-2">${title}</h3>
-                    </div>
-                `;
-                animeGrid.innerHTML += card;
+                        <h3 class="mt-3 text-xs font-bold group-hover:text-red-600 transition line-clamp-2">${movie.title}</h3>
+                    </div>`;
             });
         }
 
-        // ৩. এনিমে সার্চ করা
-        async function searchAnime() {
+        // ৩. মুভি সার্চ
+        async function searchMovie() {
             const query = document.getElementById('searchInput').value;
             if(!query) return;
-            showLoading(true);
-            document.getElementById('listTitle').innerText = `Search Results: ${query}`;
-            try {
-                const res = await fetch(`${JIKAN_API}/anime?q=${query}&limit=24`);
-                const data = await res.json();
-                displayAnime(data.data);
-            } catch (e) { alert("Search failed!"); }
-            showLoading(false);
+            showLoader(true);
+            const res = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}`);
+            const data = await res.json();
+            document.getElementById('listTitle').innerText = `Results for: ${query}`;
+            renderMovies(data.results);
+            showLoader(false);
         }
 
-        // ৪. এনিমে ডিটেইলস এবং এপিসোড (Stream API ব্যবহার করে)
-        async function loadDetails(malId, title) {
-            showLoading(true);
-            try {
-                // আমরা টাইটেল দিয়ে Consumet API তে সার্চ করবো ভিডিওর জন্য
-                const searchRes = await fetch(`${STREAM_API}/${title}`);
-                const searchData = await searchRes.json();
-                
-                if(searchData.results.length > 0) {
-                    const animeId = searchData.results[0].id; // GogoAnime ID
-                    const infoRes = await fetch(`${STREAM_API}/info/${animeId}`);
-                    const infoData = await infoRes.json();
+        // ৪. ডিটেইলস এবং ইউটিউব ট্রেলার লোড
+        async function loadDetails(id) {
+            const res = await fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&append_to_response=videos`);
+            const movie = await res.json();
+            
+            const modal = document.getElementById('movieModal');
+            const content = document.getElementById('modalContent');
+            
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
 
-                    document.getElementById('mainContent').classList.add('hidden');
-                    document.getElementById('playerSection').classList.remove('hidden');
-                    document.getElementById('playingTitle').innerText = title;
+            content.innerHTML = `
+                <img src="${IMG_URL + movie.poster_path}" class="w-full md:w-64 rounded-2xl shadow-2xl border border-white/5">
+                <div class="flex-1">
+                    <h2 class="text-4xl font-black mb-2">${movie.title}</h2>
+                    <div class="flex gap-4 text-xs font-bold text-gray-500 mb-6 uppercase tracking-widest">
+                        <span>${movie.release_date}</span>
+                        <span>${movie.runtime} Min</span>
+                        <span class="text-yellow-500">${movie.vote_average} Score</span>
+                    </div>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">${movie.overview}</p>
+                    <div class="flex flex-wrap gap-2">
+                        ${movie.genres.map(g => `<span class="bg-red-600/10 text-red-600 px-4 py-1 rounded-full text-[10px] font-bold border border-red-600/20">${g.name}</span>`).join('')}
+                    </div>
+                </div>
+            `;
 
-                    const epList = document.getElementById('episodeList');
-                    epList.innerHTML = '';
-                    infoData.episodes.forEach(ep => {
-                        epList.innerHTML += `<button onclick="playVideo('${ep.id}')" class="bg-[#0b0c10] hover:bg-[#45f3ff] hover:text-black px-4 py-2 rounded-lg text-xs font-bold transition">EP ${ep.number}</button>`;
-                    });
-
-                    if(infoData.episodes.length > 0) playVideo(infoData.episodes[0].id);
-                } else {
-                    alert("দুঃখিত, এই এনিমেটির ভিডিও সার্ভারে খুঁজে পাওয়া যায়নি।");
-                }
-            } catch(e) { alert("Video load error! API is busy."); }
-            showLoading(false);
-            window.scrollTo(0,0);
+            // ট্রেলার সেট করা
+            const trailer = movie.videos.results.find(v => v.type === 'Trailer');
+            if(trailer) {
+                document.getElementById('trailerPlayer').src = `https://www.youtube.com/embed/${trailer.key}`;
+            }
         }
 
-        // ৫. ভিডিও প্লে করা
-        async function playVideo(episodeId) {
-            try {
-                const res = await fetch(`${STREAM_API}/watch/${episodeId}`);
-                const data = await res.json();
-                const playerUrl = data.headers.Referer || data.sources[0].url;
-                document.getElementById('mainPlayer').src = playerUrl;
-            } catch(e) { alert("Player error!"); }
+        function closeModal() {
+            document.getElementById('movieModal').classList.add('hidden');
+            document.getElementById('trailerPlayer').src = '';
+            document.body.style.overflow = 'auto';
         }
 
-        function closePlayer() {
-            document.getElementById('mainContent').classList.remove('hidden');
-            document.getElementById('playerSection').classList.add('hidden');
-            document.getElementById('mainPlayer').src = '';
-            document.getElementById('listTitle').innerText = "Trending Anime";
+        function showLoader(s) {
+            document.getElementById('loader').classList.toggle('hidden', !s);
+            if(s) document.getElementById('movieGrid').innerHTML = '';
         }
 
-        function showLoading(s) {
-            loading.classList.toggle('hidden', !s);
-            if(s) animeGrid.innerHTML = '';
-        }
-
-        document.getElementById('searchInput').addEventListener("keypress", (e) => { if (e.key === "Enter") searchAnime(); });
+        document.getElementById('searchInput').addEventListener("keypress", (e) => { if(e.key === "Enter") searchMovie(); });
 
         window.onload = fetchTrending;
     </script>
