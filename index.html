@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HiAnime Clone - Watch Free Anime</title>
+    <title>HiAnime Clone - Multi-API Support</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -11,129 +11,181 @@
         .anime-card:hover img { transform: scale(1.05); transition: 0.3s; }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #57e3f2; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     </style>
 </head>
 <body>
 
     <!-- Navbar -->
-    <nav class="bg-[#1a1a1a] p-4 flex flex-col md:flex-row justify-between items-center gap-4 sticky top-0 z-50 border-b border-gray-800">
+    <nav class="bg-[#1a1a1a] p-4 flex flex-col md:flex-row justify-between items-center gap-4 sticky top-0 z-50 border-b border-gray-800 shadow-xl">
         <h1 class="text-2xl font-extrabold text-[#57e3f2] cursor-pointer" onclick="location.reload()">Hi<span class="text-white">Anime</span></h1>
         <div class="relative w-full md:w-1/2">
-            <input id="searchInput" type="text" placeholder="Search anime..." class="w-full bg-[#2a2a2a] p-2 pl-4 rounded-full outline-none border border-transparent focus:border-[#57e3f2]">
+            <input id="searchInput" type="text" placeholder="Search anime..." class="w-full bg-[#2a2a2a] p-2 pl-4 rounded-full outline-none border border-transparent focus:border-[#57e3f2] text-sm">
             <button onclick="searchAnime()" class="absolute right-3 top-2 text-[#57e3f2]"><i class="fa fa-search"></i></button>
         </div>
     </nav>
 
-    <!-- Hero / Player Section -->
-    <div id="playerSection" class="hidden p-4 md:p-10 bg-[#141414]">
-        <button onclick="closePlayer()" class="mb-4 text-gray-400 hover:text-white"><i class="fa fa-arrow-left"></i> Back to Home</button>
+    <!-- Player Section -->
+    <div id="playerSection" class="hidden p-4 md:p-8 bg-[#141414] min-h-[60vh]">
+        <button onclick="closePlayer()" class="mb-4 text-gray-400 hover:text-white transition"><i class="fa fa-arrow-left"></i> Back to Home</button>
         <div class="max-w-5xl mx-auto">
-            <div class="aspect-video bg-black rounded-lg overflow-hidden shadow-2xl border border-gray-800">
+            <div class="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-gray-800">
                 <iframe id="mainPlayer" src="" class="w-full h-full" allowfullscreen frameborder="0"></iframe>
             </div>
-            <h2 id="playingTitle" class="text-2xl font-bold mt-4 text-[#57e3f2]"></h2>
-            <div id="episodeList" class="flex flex-wrap gap-2 mt-4 max-h-40 overflow-y-auto p-2 bg-[#1a1a1a] rounded">
-                <!-- Episodes will load here -->
+            <h2 id="playingTitle" class="text-xl md:text-2xl font-bold mt-4 text-[#57e3f2]"></h2>
+            <div class="mt-6">
+                <h3 class="text-gray-400 mb-2 font-semibold">Select Episode:</h3>
+                <div id="episodeList" class="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-3 bg-[#1a1a1a] rounded-lg">
+                    <!-- Episodes -->
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Main Content -->
-    <main id="mainContent" class="p-6">
-        <h2 id="listTitle" class="text-xl font-bold mb-6 border-l-4 border-[#57e3f2] pl-3">Trending Anime</h2>
-        <div id="loading" class="flex justify-center hidden"><div class="loader"></div></div>
+    <main id="mainContent" class="p-6 max-w-7xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 id="listTitle" class="text-xl font-bold border-l-4 border-[#57e3f2] pl-3">Trending Anime</h2>
+            <span id="apiStatus" class="text-[10px] text-gray-500 bg-gray-900 px-2 py-1 rounded">API: Syncing...</span>
+        </div>
+        
+        <div id="loading" class="flex justify-center hidden my-20"><div class="loader"></div></div>
+        
         <div id="animeGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-6">
-            <!-- Anime Cards Load Here -->
+            <!-- Anime Cards -->
         </div>
     </main>
 
     <script>
-        const API_BASE = "https://api.consumet.org/anime/gogoanime";
+        // ৩টি আলাদা এপিআই সোর্স (Fallback Mechanism)
+        const API_SOURCES = [
+            "https://api-consumet-org-five.vercel.app/anime/gogoanime",
+            "https://api.consumet.org/anime/gogoanime",
+            "https://consumet-api-clone.vercel.app/anime/gogoanime"
+        ];
+
+        let currentApiIndex = 0;
         const animeGrid = document.getElementById('animeGrid');
         const loading = document.getElementById('loading');
+        const apiStatus = document.getElementById('apiStatus');
 
-        // ১. ট্রেন্ডিং এনিমে লোড করা
+        // কমন ডাটা ফেচ ফাংশন (যদি একটি ফেইল করে পরেরটি ট্রাই করবে)
+        async function fetchData(path) {
+            for (let i = 0; i < API_SOURCES.length; i++) {
+                try {
+                    const url = `${API_SOURCES[i]}${path}`;
+                    apiStatus.innerText = `API Source: ${i + 1}`;
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error("Source failed");
+                    const data = await res.json();
+                    currentApiIndex = i; // সফল হওয়া এপিআই ইন্ডেক্স সেভ রাখা
+                    return data;
+                } catch (err) {
+                    console.warn(`API Source ${i + 1} failed, trying next...`);
+                    continue; 
+                }
+            }
+            throw new Error("All API sources are down.");
+        }
+
+        // ১. ট্রেন্ডিং এনিমে লোড
         async function fetchTrending() {
             showLoading(true);
             try {
-                const res = await fetch(`${API_BASE}/top-airing`);
-                const data = await res.json();
+                const data = await fetchData('/top-airing');
                 displayAnime(data.results);
-            } catch (err) { alert("API Error! Please refresh."); }
+            } catch (err) {
+                alert("সবগুলো এপিআই সার্ভার এই মুহূর্তে ডাউন। দয়া করে কিছুক্ষণ পর চেষ্টা করুন।");
+            }
             showLoading(false);
         }
 
-        // ২. এনিমে কার্ড তৈরি করা
+        // ২. এনিমে কার্ড তৈরি
         function displayAnime(list) {
             animeGrid.innerHTML = '';
+            if(!list || list.length === 0) {
+                animeGrid.innerHTML = '<p class="col-span-full text-center text-gray-500">No results found.</p>';
+                return;
+            }
             list.forEach(anime => {
                 const card = `
-                    <div class="anime-card cursor-pointer group" onclick="loadAnimeDetails('${anime.id}', '${anime.title}')">
-                        <div class="relative overflow-hidden rounded-lg aspect-[3/4]">
-                            <img src="${anime.image}" class="w-full h-full object-cover">
-                            <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black to-transparent text-xs">
-                                ${anime.episodeNumber ? 'Ep ' + anime.episodeNumber : ''}
-                            </div>
+                    <div class="anime-card cursor-pointer group" onclick="loadAnimeDetails('${anime.id}', '${anime.title.replace(/'/g, "")}')">
+                        <div class="relative overflow-hidden rounded-lg aspect-[3/4] bg-[#1a1a1a] shadow-lg">
+                            <img src="${anime.image}" class="w-full h-full object-cover" loading="lazy">
                         </div>
-                        <h3 class="mt-2 text-sm font-medium group-hover:text-[#57e3f2] transition line-clamp-2">${anime.title}</h3>
+                        <h3 class="mt-2 text-xs md:text-sm font-medium group-hover:text-[#57e3f2] transition line-clamp-2">${anime.title}</h3>
                     </div>
                 `;
                 animeGrid.innerHTML += card;
             });
         }
 
-        // ৩. এনিমে সার্চ করা
+        // ৩. সার্চ ফাংশন
         async function searchAnime() {
             const query = document.getElementById('searchInput').value;
             if(!query) return;
             showLoading(true);
-            document.getElementById('listTitle').innerText = `Search results for: ${query}`;
-            const res = await fetch(`${API_BASE}/${query}`);
-            const data = await res.json();
-            displayAnime(data.results);
+            document.getElementById('listTitle').innerText = `Search: ${query}`;
+            try {
+                const data = await fetchData(`/${query}`);
+                displayAnime(data.results);
+            } catch(e) { alert("Search failed."); }
             showLoading(false);
         }
 
-        // ৪. এনিমে ডিটেইলস এবং এপিসোড লোড
+        // ৪. এনিমে ডিটেইলস এবং এপিসোড
         async function loadAnimeDetails(id, title) {
             showLoading(true);
-            const res = await fetch(`${API_BASE}/info/${id}`);
-            const data = await res.json();
-            
-            document.getElementById('mainContent').classList.add('hidden');
-            document.getElementById('playerSection').classList.remove('hidden');
-            document.getElementById('playingTitle').innerText = title;
-            
-            const epList = document.getElementById('episodeList');
-            epList.innerHTML = '';
-            data.episodes.forEach(ep => {
-                epList.innerHTML += `<button onclick="playVideo('${ep.id}')" class="bg-[#333] hover:bg-[#57e3f2] hover:text-black px-4 py-2 rounded text-sm transition">Ep ${ep.number}</button>`;
-            });
+            try {
+                const data = await fetchData(`/info/${id}`);
+                
+                document.getElementById('mainContent').classList.add('hidden');
+                document.getElementById('playerSection').classList.remove('hidden');
+                document.getElementById('playingTitle').innerText = title;
+                
+                const epList = document.getElementById('episodeList');
+                epList.innerHTML = '';
+                data.episodes.forEach(ep => {
+                    epList.innerHTML += `<button onclick="playVideo('${ep.id}')" class="bg-[#2a2a2a] hover:bg-[#57e3f2] hover:text-black px-4 py-2 rounded text-xs font-bold transition">EP ${ep.number}</button>`;
+                });
 
-            if(data.episodes.length > 0) playVideo(data.episodes[0].id);
+                if(data.episodes.length > 0) playVideo(data.episodes[0].id);
+            } catch(e) { alert("Details load error."); }
             showLoading(false);
             window.scrollTo(0,0);
         }
 
-        // ৫. ভিডিও প্লে করা
+        // ৫. ভিডিও প্লেয়ার লোড
         async function playVideo(episodeId) {
-            const res = await fetch(`${API_BASE}/watch/${episodeId}`);
-            const data = await res.json();
-            // আমরা সরাসরি তাদের Embed Player ব্যবহার করছি
-            document.getElementById('mainPlayer').src = data.headers.Referer || data.sources[0].url;
+            try {
+                const data = await fetchData(`/watch/${episodeId}`);
+                // Gogoanime এর জন্য সাধারণত Referer লিঙ্কটি প্লেয়ার হিসেবে কাজ করে
+                const playerUrl = data.headers.Referer || (data.sources && data.sources[0].url);
+                document.getElementById('mainPlayer').src = playerUrl;
+            } catch(e) { alert("Could not load video player."); }
         }
 
         function closePlayer() {
             document.getElementById('mainContent').classList.remove('hidden');
             document.getElementById('playerSection').classList.add('hidden');
             document.getElementById('mainPlayer').src = '';
+            document.getElementById('listTitle').innerText = "Trending Anime";
         }
 
         function showLoading(status) {
             status ? loading.classList.remove('hidden') : loading.classList.add('hidden');
+            if(status) animeGrid.innerHTML = '';
         }
 
-        fetchTrending(); // Load home data
+        // এন্টার কি প্রেস করলে সার্চ হবে
+        document.getElementById('searchInput').addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                searchAnime();
+            }
+        });
+
+        window.onload = fetchTrending;
     </script>
 </body>
 </html>
