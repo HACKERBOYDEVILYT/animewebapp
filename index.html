@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimeStream Pro | Consumet API</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- ArtPlayer.js (Professional Video Player) -->
+    <script src="https://cdn.jsdelivr.net/npm/artplayer/dist/artplayer.js"></script>
+    <!-- HLS.js for Streaming (m3u8 support) -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body { background-color: #0b0e14; color: white; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        #player { width: 100%; height: 500px; border-radius: 15px; overflow: hidden; }
+        .episode-btn { transition: 0.3s; }
+        .episode-btn:hover { background: #f97316; color: white; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="p-4 flex justify-between items-center glass sticky top-0 z-50">
+        <h1 class="text-2xl font-black text-orange-500">ANIME<span class="text-white">STREAM</span></h1>
+        <div class="flex gap-2">
+            <input id="searchQuery" type="text" placeholder="Search Anime (e.g. Naruto)" class="bg-slate-800 px-4 py-2 rounded-l-lg outline-none text-sm">
+            <button onclick="searchAnime()" class="bg-orange-500 px-4 py-2 rounded-r-lg font-bold">Search</button>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-4">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- Video Section -->
+            <div class="lg:col-span-3">
+                <div id="player" class="mb-4">
+                    <div class="h-full w-full flex items-center justify-center bg-slate-900 rounded-xl text-gray-500">
+                        Select an episode to start watching
+                    </div>
+                </div>
+                <h2 id="animeTitle" class="text-2xl font-bold text-orange-500 mt-4">Anime Title</h2>
+                <p id="animeDesc" class="text-gray-400 mt-2 text-sm italic">Description will appear here...</p>
+                
+                <!-- Episodes List -->
+                <div class="mt-8">
+                    <h3 class="text-lg font-bold mb-4">Episodes</h3>
+                    <div id="episodeList" class="grid grid-cols-5 md:grid-cols-10 gap-2">
+                        <!-- Episodes will load here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar / Results -->
+            <div class="lg:col-span-1">
+                <h3 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">Search Results</h3>
+                <div id="searchResults" class="flex flex-col gap-4 max-h-[800px] overflow-y-auto pr-2">
+                    <!-- Search items -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init();
+
+        // Consumet API Base URL (Public Instance)
+        const CONSUMET_URL = "https://api.consumet.org/anime/gogoanime";
+        let art = null;
+
+        // 1. Search Anime
+        async function searchAnime() {
+            const query = document.getElementById('searchQuery').value;
+            if(!query) return;
+
+            const res = await fetch(`${CONSUMET_URL}/${query}`);
+            const data = await res.json();
+            
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = "";
+
+            data.results.forEach(anime => {
+                const item = `
+                    <div onclick="loadEpisodes('${anime.id}')" class="glass p-2 rounded-lg cursor-pointer flex gap-3 hover:bg-orange-500/20 transition">
+                        <img src="${anime.image}" class="w-16 h-20 object-cover rounded">
+                        <div>
+                            <h4 class="text-xs font-bold">${anime.title}</h4>
+                            <p class="text-[10px] text-gray-400 mt-1 uppercase">${anime.releaseDate || 'N/A'}</p>
+                        </div>
+                    </div>
+                `;
+                resultsDiv.innerHTML += item;
+            });
+        }
+
+        // 2. Load Episode List
+        async function loadEpisodes(animeId) {
+            const res = await fetch(`${CONSUMET_URL}/info/${animeId}`);
+            const data = await res.json();
+            
+            document.getElementById('animeTitle').innerText = data.title;
+            document.getElementById('animeDesc').innerText = data.description || "No description available.";
+
+            const epDiv = document.getElementById('episodeList');
+            epDiv.innerHTML = "";
+
+            data.episodes.forEach(ep => {
+                const btn = `<button onclick="playVideo('${ep.id}')" class="episode-btn bg-slate-800 p-2 rounded text-xs font-bold">${ep.number}</button>`;
+                epDiv.innerHTML += btn;
+            });
+        }
+
+        // 3. Play Video (Fetch m3u8 link)
+        async function playVideo(episodeId) {
+            const res = await fetch(`${CONSUMET_URL}/watch/${episodeId}`);
+            const data = await res.json();
+            
+            // Get the best quality (usually 'default' or 'hls')
+            const videoUrl = data.sources.find(s => s.quality === 'default' || s.quality === 'backup').url;
+
+            if (art) art.destroy();
+
+            art = new ArtPlayer({
+                container: '#player',
+                url: videoUrl,
+                type: 'm3u8',
+                customType: {
+                    m3u8: function (video, url) {
+                        if (Hls.isSupported()) {
+                            const hls = new Hls();
+                            hls.loadSource(url);
+                            hls.attachMedia(video);
+                        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                            video.src = url;
+                        }
+                    },
+                },
+                autoplay: true,
+                pip: true,
+                fullscreen: true,
+                setting: true,
+                theme: '#f97316',
+            });
+        }
+    </script>
+</body>
+</html>
