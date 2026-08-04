@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimeStream Pro | Watch Now</title>
+    <title>AnimeStream | Pro Streaming</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/artplayer/dist/artplayer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -11,52 +11,55 @@
         body { background-color: #0b0e14; color: white; font-family: 'Inter', sans-serif; }
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         #player { width: 100%; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; background: #000; }
-        .ep-btn { background: #1e293b; padding: 8px; border-radius: 6px; text-align: center; cursor: pointer; font-size: 12px; transition: 0.3s; }
+        .ep-btn { background: #1e293b; padding: 10px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.3s; font-weight: bold; }
         .ep-btn:hover { background: #f97316; }
-        .active-ep { background: #f97316 !important; }
+        .active-ep { background: #f97316 !important; border: 2px solid white; }
     </style>
 </head>
 <body>
 
+    <!-- Header -->
     <nav class="p-4 flex flex-col md:flex-row justify-between items-center glass sticky top-0 z-50 gap-4">
         <h1 class="text-2xl font-black text-orange-500 cursor-pointer" onclick="location.reload()">ANIME<span class="text-white">STREAM</span></h1>
         <div class="flex w-full md:w-auto">
-            <input id="searchQuery" type="text" placeholder="Search (e.g. Naruto)..." class="bg-slate-800 px-4 py-2 rounded-l-lg outline-none w-full md:w-64">
-            <button onclick="searchAnime()" class="bg-orange-500 px-6 py-2 rounded-r-lg font-bold">Search</button>
+            <input id="searchQuery" type="text" placeholder="Search (e.g. Naruto)..." class="bg-slate-800 px-4 py-2 rounded-l-lg outline-none w-full md:w-64 border border-slate-700 focus:border-orange-500">
+            <button onclick="searchAnime()" class="bg-orange-500 px-6 py-2 rounded-r-lg font-bold hover:bg-orange-600">Search</button>
         </div>
     </nav>
 
     <div class="container mx-auto p-4">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             
-            <!-- Player Section -->
+            <!-- Video & Info Section -->
             <div class="lg:col-span-3">
-                <div id="player" class="shadow-2xl">
-                    <div class="h-full w-full flex flex-col items-center justify-center text-gray-500">
-                        <p class="mb-2">Select an anime and episode to play</p>
+                <div id="player" class="shadow-2xl border border-slate-800">
+                    <div class="h-full w-full flex flex-col items-center justify-center text-gray-500 p-10 text-center">
+                        <svg class="w-16 h-16 mb-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path></svg>
+                        <p class="text-lg">Select an anime from the list to start watching.</p>
                     </div>
                 </div>
                 
-                <div class="mt-4 p-4 glass rounded-xl">
-                    <h2 id="animeTitle" class="text-2xl font-bold text-orange-500">Welcome!</h2>
-                    <p id="animeDesc" class="text-gray-400 mt-2 text-sm">Search for your favorite anime or select from trending.</p>
+                <div class="mt-4 p-6 glass rounded-xl">
+                    <h2 id="animeTitle" class="text-3xl font-bold text-orange-500">Ready to Stream?</h2>
+                    <p id="animeDesc" class="text-gray-400 mt-3 leading-relaxed">Discover thousands of anime titles. Use the search bar or pick one from the trending list.</p>
                 </div>
 
-                <div class="mt-6">
-                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-                        <span class="w-2 h-6 bg-orange-500 rounded-full"></span> Episodes
+                <div class="mt-8">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="w-2 h-8 bg-orange-500 rounded-full"></span> Episode List
                     </h3>
-                    <div id="episodeList" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-10 gap-2">
+                    <div id="episodeList" class="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-12 gap-2">
                         <!-- Episodes -->
+                        <p class="col-span-full text-gray-600">No episodes loaded yet.</p>
                     </div>
                 </div>
             </div>
 
             <!-- Sidebar -->
             <div class="lg:col-span-1">
-                <h3 id="sidebarTitle" class="text-xl font-bold mb-4 border-b border-gray-700 pb-2 text-orange-500">Trending Now</h3>
-                <div id="searchResults" class="flex flex-col gap-3 max-h-screen overflow-y-auto pr-2">
-                    <p class="text-gray-500">Loading anime...</p>
+                <h3 id="sidebarTitle" class="text-xl font-bold mb-4 border-b border-gray-700 pb-2 text-orange-500">Popular Today</h3>
+                <div id="searchResults" class="flex flex-col gap-3 max-h-screen overflow-y-auto pr-2 custom-scrollbar">
+                    <!-- Cards -->
                 </div>
             </div>
 
@@ -64,18 +67,38 @@
     </div>
 
     <script>
-        // আরও শক্তিশালী একটি API প্রক্সি ব্যবহার করছি
-        const API_BASE = "https://consumet-api-three-virid.vercel.app/anime/gogoanime";
+        // আরও স্টেবল API প্রক্সি (Consumet alternative)
+        const API_BASE = "https://api.consumet.org/anime/gogoanime"; // Primary
+        const FALLBACK_API = "https://consumet-api-three-virid.vercel.app/anime/gogoanime"; // Fallback
+        
         let art = null;
 
-        // ১. ট্রেন্ডিং অ্যানিমে লোড করা (যাতে পেজ খালি না থাকে)
+        // ১. ট্রেন্ডিং লোড (খুবই স্টেবল Jikan API ব্যবহার করছি মেটাডেটার জন্য)
         async function loadTrending() {
+            const container = document.getElementById('searchResults');
+            container.innerHTML = "<p class='text-gray-500'>Fetching trending...</p>";
             try {
-                const res = await fetch(`${API_BASE}/top-airing`);
-                const data = await res.json();
-                displayResults(data.results);
+                // মেটাডেটা Jikan থেকে নিলে কখনো "Busy" দেখাবে না
+                const res = await fetch(`https://api.jikan.moe/v4/top/anime?limit=15`);
+                const { data } = await res.json();
+                
+                container.innerHTML = "";
+                data.forEach(anime => {
+                    // Jikan এর টাইটেল দিয়ে সার্চ করে স্ট্রিমিং আইডি বের করা হয়
+                    const searchId = anime.title.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-");
+                    
+                    container.innerHTML += `
+                        <div onclick="loadInfo('${searchId}')" class="glass p-2 rounded-lg cursor-pointer flex gap-3 hover:bg-orange-500/20 transition group">
+                            <img src="${anime.images.jpg.image_url}" class="w-16 h-24 object-cover rounded shadow-lg group-hover:scale-105 transition">
+                            <div class="overflow-hidden">
+                                <h4 class="text-sm font-bold truncate">${anime.title}</h4>
+                                <p class="text-[10px] text-orange-500 mt-1 font-bold uppercase">${anime.type} • Score: ${anime.score}</p>
+                            </div>
+                        </div>
+                    `;
+                });
             } catch (err) {
-                document.getElementById('searchResults').innerHTML = "API is currently busy. Try searching.";
+                container.innerHTML = "<p class='text-red-500'>Failed to load trending.</p>";
             }
         }
 
@@ -84,77 +107,75 @@
             const query = document.getElementById('searchQuery').value;
             if(!query) return;
             
-            document.getElementById('searchResults').innerHTML = "Searching...";
-            document.getElementById('sidebarTitle').innerText = "Search Results";
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = "Searching...";
+            document.getElementById('sidebarTitle').innerText = "Results";
 
             try {
                 const res = await fetch(`${API_BASE}/${query}`);
                 const data = await res.json();
                 displayResults(data.results);
             } catch (err) {
-                alert("Search failed. Try again.");
+                // যদি প্রথম API কাজ না করে, তবে ২য় টি ট্রাই করবে
+                const res = await fetch(`${FALLBACK_API}/${query}`);
+                const data = await res.json();
+                displayResults(data.results);
             }
         }
 
-        // ৩. রেজাল্ট দেখানো
         function displayResults(results) {
             const container = document.getElementById('searchResults');
             container.innerHTML = "";
+            if(!results.length) { container.innerHTML = "No results found."; return; }
             results.forEach(anime => {
                 container.innerHTML += `
-                    <div onclick="loadInfo('${anime.id}')" class="glass p-2 rounded-lg cursor-pointer flex gap-3 hover:bg-orange-500/20 transition group">
-                        <img src="${anime.image}" class="w-16 h-20 object-cover rounded shadow-lg group-hover:scale-105 transition">
-                        <div class="overflow-hidden">
-                            <h4 class="text-xs font-bold truncate">${anime.title}</h4>
-                            <p class="text-[10px] text-gray-400 mt-1 uppercase">${anime.releaseDate || 'Ongoing'}</p>
-                        </div>
-                    </div>
-                `;
+                    <div onclick="loadInfo('${anime.id}')" class="glass p-2 rounded-lg cursor-pointer flex gap-3 hover:bg-orange-500/20 transition">
+                        <img src="${anime.image}" class="w-16 h-20 object-cover rounded">
+                        <h4 class="text-xs font-bold">${anime.title}</h4>
+                    </div>`;
             });
         }
 
-        // ৪. এপিসোড ইনফো লোড করা
+        // ৩. এপিসোড ও ইনফো লোড
         async function loadInfo(id) {
-            document.getElementById('episodeList').innerHTML = "Loading episodes...";
+            document.getElementById('episodeList').innerHTML = "Fetching episodes...";
             try {
-                const res = await fetch(`${API_BASE}/info/${id}`);
-                const data = await res.json();
+                let res = await fetch(`${API_BASE}/info/${id}`);
+                if (!res.ok) throw new Error();
+                let data = await res.json();
                 
                 document.getElementById('animeTitle').innerText = data.title;
-                document.getElementById('animeDesc').innerText = data.description || "No description.";
+                document.getElementById('animeDesc').innerText = data.description || "No description available.";
 
                 const epList = document.getElementById('episodeList');
                 epList.innerHTML = "";
                 data.episodes.forEach(ep => {
                     epList.innerHTML += `<div onclick="playVideo('${ep.id}', this)" class="ep-btn">Ep ${ep.number}</div>`;
                 });
-                
-                // স্ক্রল করে উপরে নিয়ে যাওয়া (মোবাইলের জন্য ভালো)
                 window.scrollTo({top: 0, behavior: 'smooth'});
             } catch (err) {
-                alert("Could not load episodes.");
+                alert("This specific anime info is currently unavailable. Try another one.");
             }
         }
 
-        // ৫. ভিডিও প্লে করা
-        async function playVideo(epId, btnElement) {
-            // Active button style
+        // ৪. ভিডিও প্লেয়ার (Auto-quality supported)
+        async function playVideo(epId, btn) {
             document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active-ep'));
-            btnElement.classList.add('active-ep');
+            btn.classList.add('active-ep');
 
             try {
                 const res = await fetch(`${API_BASE}/watch/${epId}`);
                 const data = await res.json();
-                const source = data.sources.find(s => s.quality === 'default' || s.quality === 'backup') || data.sources[0];
+                const videoSource = data.sources.find(s => s.quality === 'default') || data.sources[0];
 
                 if (art) art.destroy();
 
                 art = new ArtPlayer({
                     container: '#player',
-                    url: source.url,
+                    url: videoSource.url,
                     type: 'm3u8',
                     customType: {
-                        m3u8: function (video, url) {
+                        m3u8: (video, url) => {
                             if (Hls.isSupported()) {
                                 const hls = new Hls();
                                 hls.loadSource(url);
@@ -165,17 +186,17 @@
                         },
                     },
                     autoplay: true,
-                    pip: true,
                     fullscreen: true,
+                    pip: true,
                     setting: true,
                     theme: '#f97316',
+                    lock: true, // Screen lock for mobile
                 });
             } catch (err) {
-                alert("Video source not found.");
+                alert("Could not load video source.");
             }
         }
 
-        // পেজ লোড হলে ট্রেন্ডিং দেখাবে
         window.onload = loadTrending;
     </script>
 </body>
