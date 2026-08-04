@@ -1,136 +1,31 @@
-<script>
-    // ১. স্টেবল API URL
-    const API_GOGO = "https://consumet-api.deno.dev/anime/gogoanime";
-    const ANILIST = 'https://graphql.anilist.co';
-    
-    let currentTitle = "";
-    let currentLang = 'sub';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Anime Site</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white">
+    <h1 class="text-center text-3xl my-10 font-bold">Latest Anime</h1>
+    <div id="anime-list" class="grid grid-cols-2 md:grid-cols-5 gap-4 p-5">
+        <!-- এনিমে এখানে লোড হবে -->
+    </div>
 
-    window.onload = () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const animeName = urlParams.get('anime');
-        if (animeName) {
-            // যদি URL-এ এনিমে নাম থাকে, তবে সেটা দিয়ে সার্চ করবে
-            searchAnime(decodeURIComponent(animeName));
-        } else {
-            loadTrending();
-        }
-    };
-
-    function navigateHome() {
-        window.history.pushState({}, '', window.location.pathname);
-        document.getElementById('homeView').classList.remove('hidden');
-        document.getElementById('watchView').classList.add('hidden');
-        document.getElementById('viewTitle').innerHTML = '<span class="w-1.5 h-6 bg-[#ff5c00] rounded-full"></span> TRENDING NOW';
-        loadTrending();
-    }
-
-    // ট্রেন্ডিং এনিমে লোড করা
-    async function loadTrending() {
-        const query = `query { Page(perPage: 24) { media(sort: TRENDING_DESC, type: ANIME) { title { english romaji } coverImage { large } } } }`;
-        try {
-            const res = await fetch(ANILIST, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) });
-            const { data } = await res.json();
-            renderGrid(data.Page.media, true);
-        } catch (err) { console.error(err); }
-    }
-
-    // গ্রিডে এনিমে কার্ড দেখানো
-    function renderGrid(list, isAnilist = false) {
-        const grid = document.getElementById('animeGrid');
-        grid.innerHTML = "";
-        list.forEach(anime => {
-            // Anilist এবং GogoAnime-এর ডেটা ফরম্যাট আলাদা হয়, তাই চেক করে নেওয়া হচ্ছে
-            const title = isAnilist ? (anime.title.english || anime.title.romaji) : anime.title;
-            const image = isAnilist ? anime.coverImage.large : anime.image;
-            const id = isAnilist ? title : anime.id;
-
-            grid.innerHTML += `
-                <div class="anime-card" onclick="${isAnilist ? `searchAnime('${title.replace(/'/g, "")}')` : `openAnimeDetails('${id}')`}">
-                    <img src="${image}" alt="cover">
-                    <div class="p-2 text-[10px] font-bold truncate">${title}</div>
-                </div>`;
-        });
-    }
-
-    // সার্চ অপশন (Partial Search - আংশিক নাম দিলেও কাজ করবে)
-    async function searchAnime(manualQuery = null) {
-        const val = manualQuery || document.getElementById('searchInp').value;
-        if(!val) return;
-        
-        // UI আপডেট
-        document.getElementById('homeView').classList.remove('hidden');
-        document.getElementById('watchView').classList.add('hidden');
-        document.getElementById('animeGrid').innerHTML = "";
-        document.getElementById('mainLoader').classList.remove('hidden');
-        document.getElementById('viewTitle').innerHTML = `<span class="w-1.5 h-6 bg-[#ff5c00] rounded-full"></span> RESULTS FOR: ${val.toUpperCase()}`;
-        
-        try {
-            const res = await fetch(`${API_GOGO}/${val}`);
-            const data = await res.json();
-            document.getElementById('mainLoader').classList.add('hidden');
-            
-            if(!data.results || data.results.length === 0) {
-                document.getElementById('animeGrid').innerHTML = "<p class='col-span-full text-center py-10'>No anime found with this name. Try a different spelling.</p>";
-                return;
-            }
-            // সব ম্যাচিং এনিমে কার্ড হিসেবে দেখাবে
-            renderGrid(data.results, false);
-        } catch(e) {
-            document.getElementById('mainLoader').classList.add('hidden');
-            alert("API Error! Please try again later.");
-        }
-    }
-
-    // এনিমে আইডি দিয়ে ডিটেইলস ও এপিসোড লোড করা
-    async function openAnimeDetails(animeId) {
-        document.getElementById('homeView').classList.add('hidden');
-        document.getElementById('watchView').classList.remove('hidden');
-        document.getElementById('epList').innerHTML = '<div class="loading mx-auto col-span-full"></div>';
-        window.scrollTo(0,0);
-
-        try {
-            const res = await fetch(`${API_GOGO}/info/${animeId}`);
-            const data = await res.json();
-
-            document.getElementById('detTitle').innerText = data.title;
-            document.getElementById('detDesc').innerText = data.description || "No description available.";
-            
-            const epDiv = document.getElementById('epList');
-            epDiv.innerHTML = "";
-            
-            if(!data.episodes || data.episodes.length === 0) {
-                epDiv.innerHTML = "<p class='col-span-full text-red-500'>No episodes found for this version.</p>";
-                return;
-            }
-
-            data.episodes.forEach(ep => {
-                const btn = document.createElement('button');
-                btn.className = 'ep-btn';
-                btn.innerText = ep.number;
-                btn.onclick = () => playVideo(ep.id, btn);
-                epDiv.appendChild(btn);
+    <script>
+        // এই API টি এনিমে ডাটা প্রদান করে
+        fetch('https://api.consumet.org/anime/gogoanime/top-airing')
+        .then(response => response.json())
+        .then(data => {
+            const list = document.getElementById('anime-list');
+            data.results.forEach(anime => {
+                list.innerHTML += `
+                    <div class="bg-gray-800 p-2 rounded-lg">
+                        <img src="${anime.image}" class="w-full h-64 object-cover rounded">
+                        <h3 class="mt-2 text-sm">${anime.title}</h3>
+                    </div>
+                `;
             });
-
-            // প্রথম এপিসোড অটো প্লে
-            playVideo(data.episodes[0].id, epDiv.firstChild);
-
-        } catch (err) {
-            document.getElementById('epList').innerHTML = `<p class="col-span-full text-red-500 text-center">Failed to load episodes. Please try again.</p>`;
-        }
-    }
-
-    function playVideo(epId, btn) {
-        document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active-ep'));
-        if(btn) btn.classList.add('active-ep');
-
-        // ভিডিও প্লেয়ার লিঙ্ক
-        const url = `https://playtuna.xyz/video/gogoanime/${epId}`;
-        document.getElementById('player-box').innerHTML = `<iframe src="${url}" allowfullscreen="true" scrolling="no"></iframe>`;
-    }
-
-    function updateURL(title) {
-        window.history.pushState({}, '', '?anime=' + encodeURIComponent(title));
-        searchAnime(title);
-    }
-</script>
+        });
+    </script>
+</body>
+</html>
