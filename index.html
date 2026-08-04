@@ -3,127 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HiStream | Ultimate Anime</title>
+    <title>HiStream | Multi-Language Anime</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #06090f; color: white; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        body { background-color: #06090f; color: white; font-family: 'Inter', sans-serif; }
         .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        
-        /* বড় এবং প্রিমিয়াম কার্ড */
         .anime-card { cursor: pointer; transition: 0.4s; position: relative; overflow: hidden; border-radius: 12px; }
-        .anime-card:hover { transform: translateY(-10px); }
-        .anime-card img { width: 100%; height: 280px; object-fit: cover; border-radius: 12px; }
-        .card-overlay { background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); position: absolute; bottom: 0; width: 100%; padding: 20px 10px; }
-
-        #player-box { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+        .anime-card:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 92, 0, 0.3); }
+        .anime-card img { width: 100%; height: 260px; object-fit: cover; border-radius: 12px; }
+        #player-box { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; }
         iframe { width: 100%; height: 100%; border: none; }
-
-        .ep-btn { background: #111827; padding: 12px; border-radius: 8px; font-weight: bold; border: 1px solid #1f2937; text-align: center; cursor: pointer; }
-        .ep-btn:hover, .active-ep { background: #ff5c00; border-color: white; color: white; }
-
-        .server-btn { background: #1f2937; padding: 8px 15px; border-radius: 5px; font-size: 11px; font-weight: bold; cursor: pointer; }
-        .active-server { background: #ff5c00; }
-
-        .loading { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #ff5c00; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
+        .ep-btn { background: #111827; padding: 10px; border-radius: 6px; font-weight: bold; border: 1px solid #1f2937; text-align: center; cursor: pointer; font-size: 13px; }
+        .ep-btn:hover, .active-ep { background: #ff5c00; border-color: white; }
+        .lang-btn { padding: 6px 15px; border-radius: 20px; font-size: 11px; font-weight: bold; border: 1px solid #333; transition: 0.3s; }
+        .lang-active { background: #ff5c00; border-color: white; }
         .hidden { display: none; }
+        .loading { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #ff5c00; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- Navbar -->
     <nav class="p-4 flex flex-col md:flex-row justify-between items-center glass sticky top-0 z-50 gap-4">
         <h1 class="text-3xl font-black text-[#ff5c00] tracking-tighter cursor-pointer" onclick="goHome()">HI<span class="text-white">STREAM</span></h1>
         <div class="flex w-full md:w-[500px]">
             <input id="searchInp" type="text" placeholder="Search anime..." class="bg-[#111827] px-5 py-3 rounded-l-xl outline-none w-full border border-gray-800 focus:border-[#ff5c00]">
-            <button onclick="searchAnime()" class="bg-[#ff5c00] px-8 py-3 rounded-r-xl font-black hover:bg-[#e65300]">SEARCH</button>
+            <button onclick="searchAnime()" class="bg-[#ff5c00] px-8 py-3 rounded-r-xl font-black">SEARCH</button>
         </div>
     </nav>
 
     <div class="container mx-auto p-4">
         
-        <!-- Detail View (Initially Hidden) -->
-        <div id="detailView" class="hidden animate-fade-in">
-            <button onclick="goHome()" class="mb-6 text-[#ff5c00] font-bold flex items-center gap-2"> ← BACK TO HOME</button>
+        <!-- Detail View -->
+        <div id="detailView" class="hidden">
+            <button onclick="goHome()" class="mb-6 text-[#ff5c00] font-bold">← BACK</button>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div class="lg:col-span-2">
                     <div id="player-box"></div>
-                    <div id="serverBar" class="mt-4 flex gap-3">
-                        <span class="text-gray-500 font-bold text-xs flex items-center">SERVERS:</span>
-                        <button onclick="switchServer(1)" id="srv1" class="server-btn active-server">SERVER 1</button>
-                        <button onclick="switchServer(2)" id="srv2" class="server-btn">SERVER 2</button>
-                        <button onclick="switchServer(3)" id="srv3" class="server-btn">SERVER 3</button>
+                    
+                    <!-- Language Selection -->
+                    <div class="mt-4 flex flex-wrap gap-3 items-center">
+                        <span class="text-xs font-bold text-gray-500 uppercase">Audio:</span>
+                        <button onclick="changeLang('jp')" id="btn-jp" class="lang-btn lang-active">JAPANESE (SUB)</button>
+                        <button onclick="changeLang('en')" id="btn-en" class="lang-btn">ENGLISH (DUB)</button>
+                        <button onclick="changeLang('bn')" id="btn-bn" class="lang-btn">BANGLA</button>
                     </div>
+
                     <div class="mt-6 p-6 glass rounded-2xl border-l-[6px] border-[#ff5c00]">
-                        <h2 id="detTitle" class="text-3xl font-black"></h2>
-                        <p id="detDesc" class="text-gray-400 mt-3 text-sm leading-relaxed"></p>
+                        <h2 id="detTitle" class="text-2xl font-black"></h2>
+                        <p id="detDesc" class="text-gray-400 mt-2 text-sm leading-relaxed"></p>
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-xl font-black mb-4 tracking-widest text-[#ff5c00]">EPISODES</h3>
-                    <div id="epList" class="grid grid-cols-4 md:grid-cols-5 gap-2 max-h-[500px] overflow-y-auto pr-2">
-                        <!-- Eps -->
-                    </div>
+                    <h3 class="text-xl font-black mb-4 text-[#ff5c00]">EPISODES</h3>
+                    <div id="epList" class="grid grid-cols-5 gap-2 max-h-[500px] overflow-y-auto pr-2"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Home View (Trending List) -->
+        <!-- Home View -->
         <div id="homeView">
-            <h3 id="sectionTitle" class="text-2xl font-black mb-8 flex items-center gap-3">
-                <span class="h-8 w-2 bg-[#ff5c00] rounded-full"></span> TRENDING NOW
-            </h3>
-            <div id="animeGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-                <!-- Big Cards -->
-            </div>
-            <div id="mainLoader" class="flex justify-center p-20 hidden"><div class="loading"></div></div>
+            <h3 id="sectionTitle" class="text-xl font-black mb-6 tracking-widest text-[#ff5c00]">TRENDING NOW</h3>
+            <div id="animeGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+            <div id="loader" class="flex justify-center p-20 hidden"><div class="loading"></div></div>
         </div>
-
     </div>
 
     <script>
         const ANILIST = 'https://graphql.anilist.co';
         const CONSUMET = 'https://api.consumet.org/anime/gogoanime';
         
+        let currentAnimeTitle = "";
+        let currentLang = 'jp'; 
         let currentEpId = "";
 
-        // ১. হোমে ফিরে যাওয়া
         function goHome() {
             document.getElementById('homeView').classList.remove('hidden');
             document.getElementById('detailView').classList.add('hidden');
-            window.scrollTo(0,0);
         }
 
-        // ২. ট্রেন্ডিং লোড
         async function loadTrending() {
-            const query = `query { Page(perPage: 24) { media(sort: TRENDING_DESC, type: ANIME) { title { english romaji } coverImage { large } description } } }`;
+            const query = `query { Page(perPage: 24) { media(sort: TRENDING_DESC, type: ANIME) { title { english romaji } coverImage { large } } } }`;
             const res = await fetch(ANILIST, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query })
             });
             const { data } = await res.json();
-            renderCards(data.Page.media);
-        }
-
-        // ৩. সার্চ
-        async function searchAnime() {
-            const val = document.getElementById('searchInp').value;
-            if(!val) return;
-            document.getElementById('animeGrid').innerHTML = "";
-            document.getElementById('mainLoader').classList.remove('hidden');
-            
-            const query = `query { Page(perPage: 24) { media(search: "${val}", type: ANIME) { title { english romaji } coverImage { large } description } } }`;
-            const res = await fetch(ANILIST, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query })
-            });
-            const { data } = await res.json();
-            document.getElementById('mainLoader').classList.add('hidden');
-            document.getElementById('sectionTitle').innerText = "SEARCH RESULTS";
             renderCards(data.Page.media);
         }
 
@@ -134,74 +101,81 @@
                 const title = anime.title.english || anime.title.romaji;
                 grid.innerHTML += `
                     <div class="anime-card" onclick="openAnime('${title.replace(/'/g, "")}')">
-                        <img src="${anime.coverImage.large}" alt="img">
-                        <div class="card-overlay">
-                            <h4 class="text-xs font-bold line-clamp-2">${title}</h4>
-                        </div>
+                        <img src="${anime.coverImage.large}">
+                        <div class="p-2"><h4 class="text-[11px] font-bold truncate">${title}</h4></div>
                     </div>`;
             });
         }
 
-        // ৪. এনিমে ডিটেইলসে ঢোকা
-        async function openAnime(fullTitle) {
+        async function openAnime(title) {
+            currentAnimeTitle = title;
             document.getElementById('homeView').classList.add('hidden');
             document.getElementById('detailView').classList.remove('hidden');
-            document.getElementById('detTitle').innerText = "Loading...";
-            document.getElementById('epList').innerHTML = '<div class="loading"></div>';
-            document.getElementById('player-box').innerHTML = '<div class="h-full flex items-center justify-center text-gray-500 italic">Searching for episodes...</div>';
-            window.scrollTo(0,0);
+            fetchEpisodes();
+        }
 
+        async function fetchEpisodes() {
+            const epList = document.getElementById('epList');
+            epList.innerHTML = '<div class="loading"></div>';
+            
+            // Language logic for search
+            let searchQuery = currentAnimeTitle.split(':')[0].split('Season')[0].trim();
+            if(currentLang === 'en') searchQuery += " (Dub)";
+            
             try {
-                // নাম ছোট করে সার্চ করা (যাতে সেশন ৩ বা এসব ঝামেলা না করে)
-                let shortTitle = fullTitle.split(':')[0].split('Season')[0].trim();
-                
-                const sRes = await fetch(`${CONSUMET}/${shortTitle}`);
+                const sRes = await fetch(`${CONSUMET}/${searchQuery}`);
                 const sData = await sRes.json();
                 
-                if(!sData.results.length) throw new Error("No Results");
+                // যদি রেজাল্ট না পায়, তবে সাধারণ নাম দিয়ে চেষ্টা করবে
+                let finalAnime = sData.results[0];
+                if(!finalAnime && currentLang === 'en') {
+                    const fallback = await fetch(`${CONSUMET}/${searchQuery.replace(" (Dub)", "")}`);
+                    const fData = await fallback.json();
+                    finalAnime = fData.results.find(a => a.id.includes('dub')) || fData.results[0];
+                }
 
-                const animeId = sData.results[0].id;
-                const iRes = await fetch(`${CONSUMET}/info/${animeId}`);
+                const iRes = await fetch(`${CONSUMET}/info/${finalAnime.id}`);
                 const iData = await iRes.json();
 
                 document.getElementById('detTitle').innerText = iData.title;
-                document.getElementById('detDesc').innerHTML = iData.description || "No description.";
+                document.getElementById('detDesc').innerText = iData.description || "";
                 
-                const epList = document.getElementById('epList');
                 epList.innerHTML = "";
                 iData.episodes.forEach(ep => {
                     epList.innerHTML += `<button onclick="playVideo('${ep.id}', this)" class="ep-btn">${ep.number}</button>`;
                 });
 
-                // অটো প্রথম এপিসোড প্লে হবে
-                if(iData.episodes.length > 0) {
-                    playVideo(iData.episodes[0].id, document.querySelector('.ep-btn'));
-                }
+                if(iData.episodes.length > 0) playVideo(iData.episodes[0].id, document.querySelector('.ep-btn'));
 
             } catch (err) {
-                document.getElementById('detTitle').innerText = "Not Found";
-                document.getElementById('epList').innerHTML = "<p class='col-span-full text-red-500'>Sorry, we couldn't find episodes for this anime title.</p>";
+                epList.innerHTML = "<p class='text-xs text-red-500'>Episodes not available for this language.</p>";
             }
         }
 
-        // ৫. ভিডিও প্লেয়ার
-        function playVideo(epId, btn) {
-            currentEpId = epId;
-            document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active-ep'));
-            btn.classList.add('active-ep');
-            switchServer(1);
+        function changeLang(lang) {
+            if(lang === 'bn') {
+                alert("Bangla Dub is only available for some popular anime like Doraemon, Shinchan, or Naruto (Limited). Switching to available source...");
+            }
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('lang-active'));
+            document.getElementById('btn-' + lang).classList.add('lang-active');
+            fetchEpisodes();
         }
 
-        function switchServer(num) {
-            document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active-server'));
-            document.getElementById('srv' + num).classList.add('active-server');
-
-            let url = "";
-            if(num === 1) url = `https://www.social-stream.to/embed/gogoanime/${currentEpId}`;
-            if(num === 2) url = `https://un-block.me/api/embed?id=${currentEpId}`;
-            if(num === 3) url = `https://api.consumet.org/anime/gogoanime/watch/${currentEpId}?server=gogocdn`;
-
+        function playVideo(id, btn) {
+            document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active-ep'));
+            btn.classList.add('active-ep');
+            const url = `https://www.social-stream.to/embed/gogoanime/${id}`;
             document.getElementById('player-box').innerHTML = `<iframe src="${url}" allowfullscreen="true" scrolling="no"></iframe>`;
+        }
+
+        async function searchAnime() {
+            const val = document.getElementById('searchInp').value;
+            if(!val) return;
+            const query = `query { Page(perPage: 24) { media(search: "${val}", type: ANIME) { title { english romaji } coverImage { large } } } }`;
+            const res = await fetch(ANILIST, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) });
+            const { data } = await res.json();
+            renderCards(data.Page.media);
         }
 
         window.onload = loadTrending;
