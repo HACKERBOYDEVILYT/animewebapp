@@ -3,65 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HiAnime Pro - Enhanced with AniList</title>
+    <title>HiAnime Mega - Unstoppable Streaming</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0b0b0b; color: #fff; font-family: 'Inter', sans-serif; }
-        .anime-card:hover img { transform: scale(1.05); transition: 0.4s; }
-        .loader { border: 4px solid #1a1a1a; border-top: 4px solid #57e3f2; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        body { background-color: #050505; color: #fff; font-family: 'Inter', sans-serif; }
+        .anime-card:hover img { transform: scale(1.1); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .loader { border: 3px solid #111; border-top: 3px solid #57e3f2; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .banner-mask { background: linear-gradient(to bottom, transparent, #0b0b0b); }
+        .banner-gradient { background: linear-gradient(0deg, #050505 0%, transparent 100%); }
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #57e3f2; }
     </style>
 </head>
-<body>
+<body class="custom-scroll">
 
-    <nav class="bg-[#111] p-4 flex flex-col md:flex-row justify-between items-center gap-4 sticky top-0 z-50 border-b border-gray-800">
-        <h1 class="text-3xl font-black text-[#57e3f2] cursor-pointer" onclick="location.reload()">Hi<span class="text-white">Anime</span></h1>
-        <div class="relative w-full md:w-1/2">
-            <input id="searchInput" type="text" placeholder="Search anime..." class="w-full bg-[#1a1a1a] p-3 pl-5 rounded-xl outline-none border border-gray-700 focus:border-[#57e3f2] text-sm">
-            <button onclick="searchAnime()" class="absolute right-4 top-3 text-[#57e3f2]"><i class="fa fa-search"></i></button>
+    <!-- Header -->
+    <nav class="bg-black/80 backdrop-blur-md p-4 sticky top-0 z-[100] border-b border-white/5 shadow-2xl">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <h1 class="text-3xl font-black text-[#57e3f2] tracking-tighter cursor-pointer" onclick="location.reload()">Hi<span class="text-white">Anime</span></h1>
+            <div class="relative w-full md:w-2/3 lg:w-1/2">
+                <input id="searchInput" type="text" placeholder="Search across 10,000+ anime..." class="w-full bg-[#111] p-3 pl-5 rounded-2xl outline-none border border-white/10 focus:border-[#57e3f2] transition-all text-sm shadow-inner">
+                <button onclick="searchAnime()" class="absolute right-4 top-3 text-[#57e3f2]"><i class="fa fa-search"></i></button>
+            </div>
         </div>
     </nav>
 
-    <!-- Player & Details Section -->
-    <div id="playerSection" class="hidden animate-fadeIn">
-        <!-- Banner from AniList -->
-        <div id="animeBanner" class="h-[300px] w-full bg-cover bg-center relative">
-            <div class="absolute inset-0 banner-mask"></div>
-            <button onclick="closePlayer()" class="absolute top-5 left-5 bg-black/50 p-2 rounded-full hover:bg-[#57e3f2] hover:text-black transition">
-                <i class="fa fa-arrow-left px-2"></i>
-            </button>
+    <!-- Player & AniList Meta Section -->
+    <div id="playerSection" class="hidden animate-fadeIn pb-10">
+        <div id="aniBanner" class="h-[350px] w-full bg-cover bg-center relative border-b border-white/10">
+            <div class="absolute inset-0 banner-gradient"></div>
+            <button onclick="closePlayer()" class="absolute top-5 left-5 bg-black/60 backdrop-blur-md p-3 rounded-full hover:bg-[#57e3f2] hover:text-black transition-all z-20">
+                <i class="fa fa-arrow-left px-1"></i>
+            </div>
         </div>
 
-        <div class="max-w-6xl mx-auto px-4 -mt-20 relative z-10">
-            <div class="flex flex-col md:flex-row gap-8">
-                <!-- Video Player -->
-                <div class="flex-1">
-                    <div class="aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-800">
-                        <iframe id="mainPlayer" src="" class="w-full h-full" allowfullscreen frameborder="0"></iframe>
+        <div class="max-w-7xl mx-auto px-4 -mt-32 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <div class="lg:col-span-3">
+                    <div class="aspect-video bg-black rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(87,227,242,0.15)] border border-white/10">
+                        <iframe id="mainPlayer" src="" class="w-full h-full" allowfullscreen frameborder="0" allow="autoplay; encrypted-media"></iframe>
                     </div>
-                    <h2 id="playingTitle" class="text-3xl font-bold mt-6 text-[#57e3f2]"></h2>
-                    <p id="animeDesc" class="text-gray-400 mt-4 text-sm leading-relaxed line-clamp-3"></p>
-                    
-                    <div class="mt-8">
-                        <h3 class="text-white mb-4 font-bold flex items-center gap-2 uppercase tracking-widest text-xs">
-                            <i class="fa fa-play-circle text-[#57e3f2]"></i> Select Episode
-                        </h3>
-                        <div id="episodeList" class="flex flex-wrap gap-2 max-h-60 overflow-y-auto p-2 bg-gray-900/50 rounded-xl">
+                    <div class="mt-6">
+                        <h2 id="playingTitle" class="text-3xl font-black text-white mb-2"></h2>
+                        <div id="aniGenres" class="flex flex-wrap gap-2 mb-4"></div>
+                        <p id="animeDesc" class="text-gray-400 text-sm leading-relaxed max-w-3xl line-clamp-3"></p>
+                    </div>
+
+                    <div class="mt-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="bg-[#57e3f2] w-1 h-6 rounded-full"></span>
+                            <h3 class="font-bold text-lg tracking-widest uppercase">Select Episode</h3>
+                        </div>
+                        <div id="episodeList" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-10 gap-3 max-h-60 overflow-y-auto p-4 bg-[#0a0a0a] rounded-3xl border border-white/5 custom-scroll">
                             <!-- Episodes -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Side Info (AniList Data) -->
-                <div class="w-full md:w-72 space-y-4">
-                    <div class="bg-[#1a1a1a] p-5 rounded-2xl border border-gray-800">
-                        <p class="text-xs text-gray-500 uppercase font-bold mb-1">Score</p>
-                        <p id="aniScore" class="text-2xl font-black text-yellow-400"></p>
-                        <hr class="my-3 border-gray-800">
-                        <p class="text-xs text-gray-500 uppercase font-bold mb-1">Genres</p>
-                        <div id="aniGenres" class="flex flex-wrap gap-1"></div>
+                <!-- Side Meta Card -->
+                <div class="hidden lg:block">
+                    <div class="bg-[#0a0a0a] p-6 rounded-3xl border border-white/5 sticky top-28 shadow-xl">
+                        <img id="aniPoster" src="" class="w-full rounded-2xl mb-4 shadow-lg border border-white/10">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-gray-500 text-xs font-bold uppercase tracking-widest">User Score</span>
+                            <span id="aniScore" class="text-xl font-black text-cyan-400 font-mono"></span>
+                        </div>
+                        <div class="space-y-2">
+                            <p class="text-[10px] text-gray-600 uppercase font-bold">Status</p>
+                            <p id="aniStatus" class="text-sm font-semibold text-gray-300"></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -70,127 +82,168 @@
 
     <!-- Main Listing -->
     <main id="mainContent" class="p-6 max-w-7xl mx-auto">
-        <h2 id="listTitle" class="text-2xl font-bold mb-8 border-l-4 border-[#57e3f2] pl-4 uppercase">Trending</h2>
-        <div id="loading" class="flex justify-center hidden my-20"><div class="loader"></div></div>
-        <div id="animeGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-6"></div>
+        <div class="flex justify-between items-center mb-10">
+            <h2 id="listTitle" class="text-2xl font-black border-l-4 border-[#57e3f2] pl-4 uppercase tracking-tighter">Trending Now</h2>
+            <div id="activeApi" class="text-[9px] font-bold text-white/30 bg-white/5 px-3 py-1 rounded-full uppercase tracking-widest border border-white/5">
+                Syncing...
+            </div>
+        </div>
+
+        <div id="loading" class="flex flex-col items-center justify-center my-40 hidden">
+            <div class="loader mb-6"></div>
+            <p class="text-[#57e3f2] font-black tracking-[0.3em] text-xs animate-pulse">CONNECTING TO MULTI-API POOL</p>
+        </div>
+
+        <div id="animeGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 lg:gap-8">
+            <!-- Anime Grid -->
+        </div>
     </main>
 
     <script>
-        const API_SOURCES = [
+        // আপনার জন্য মাল্টি-এপিআই পুল (Multi-API Pool)
+        const API_POOL = [
             "https://anime-api-rn7p.onrender.com/anime/gogoanime",
-            "https://c.delusionz.xyz/anime/gogoanime"
+            "https://c.delusionz.xyz/anime/gogoanime",
+            "https://consumet-api-production-e852.up.railway.app/anime/gogoanime",
+            "https://api-consumet-org-five.vercel.app/anime/gogoanime",
+            "https://api.consumet.org/anime/gogoanime",
+            "https://consumet-api-clone.vercel.app/anime/gogoanime",
+            "https://api-consumet-org.onrender.com/anime/gogoanime"
         ];
-        const ANILIST_API = "https://graphql.anilist.co";
 
-        // ১. AniList থেকে ডাটা আনার ফাংশন (GraphQL)
-        async function fetchAniListData(title) {
-            const query = `
-                query ($search: String) {
-                    Media (search: $search, type: ANIME) {
-                        description
-                        averageScore
-                        bannerImage
-                        genres
-                    }
+        const ANILIST_URL = "https://graphql.anilist.co";
+        const animeGrid = document.getElementById('animeGrid');
+        const loading = document.getElementById('loading');
+        const activeApiText = document.getElementById('activeApi');
+
+        // স্মার্ট মাল্টি-এপিআই রিকোয়েস্ট ফাংশন
+        async function multiApiFetch(endpoint) {
+            for (let i = 0; i < API_POOL.length; i++) {
+                try {
+                    activeApiText.innerText = `Source: POOL-NODE-${i + 1}`;
+                    const res = await fetch(`${API_POOL[i]}${endpoint}`, { signal: AbortSignal.timeout(5000) });
+                    if (res.ok) return await res.json();
+                } catch (e) { 
+                    console.log(`Node ${i+1} failed, rotating...`);
+                    continue; 
                 }
-            `;
+            }
+            throw new Error("Critical: All API nodes down.");
+        }
+
+        // AniList মেটাডাটা ফাংশন
+        async function getAniListData(title) {
+            const query = `query ($search: String) { Media (search: $search, type: ANIME) { 
+                description bannerImage coverImage { large } averageScore genres status } 
+            }`;
             try {
-                const response = await fetch(ANILIST_API, {
+                const res = await fetch(ANILIST_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query, variables: { search: title } })
                 });
-                const json = await response.json();
+                const json = await res.json();
                 return json.data.Media;
             } catch (e) { return null; }
         }
 
-        // ২. সাধারণ ডাটা ফেচিং
-        async function fetchWithFallback(endpoint) {
-            for (let api of API_SOURCES) {
-                try {
-                    const res = await fetch(`${api}${endpoint}`);
-                    if (res.ok) return await res.json();
-                } catch (err) { continue; }
-            }
-            throw new Error("All APIs down");
-        }
-
-        // ৩. এনিমে ডিটেইলস (Consumet + AniList)
-        async function loadAnimeDetails(id, title) {
-            showLoading(true);
-            try {
-                // Consumet থেকে এপিসোড আনা
-                const data = await fetchWithFallback(`/info/${id}`);
-                // AniList থেকে মেটাডাটা আনা
-                const aniData = await fetchAniListData(title);
-
-                document.getElementById('mainContent').classList.add('hidden');
-                document.getElementById('playerSection').classList.remove('hidden');
-                document.getElementById('playingTitle').innerText = title;
-                
-                // AniList ডাটা আপডেট করা
-                if(aniData) {
-                    document.getElementById('animeBanner').style.backgroundImage = `url(${aniData.bannerImage})`;
-                    document.getElementById('animeDesc').innerHTML = aniData.description || "No description available.";
-                    document.getElementById('aniScore').innerText = aniData.averageScore ? `${aniData.averageScore}%` : "N/A";
-                    document.getElementById('aniGenres').innerHTML = aniData.genres.map(g => `<span class="bg-gray-800 text-[10px] px-2 py-1 rounded-md text-gray-300">${g}</span>`).join('');
-                }
-
-                const epList = document.getElementById('episodeList');
-                epList.innerHTML = '';
-                data.episodes.forEach(ep => {
-                    epList.innerHTML += `<button onclick="playVideo('${ep.id}')" class="bg-[#2a2a2a] hover:bg-[#57e3f2] hover:text-black px-4 py-2 rounded-lg text-xs font-bold transition">EP ${ep.number}</button>`;
-                });
-
-                if(data.episodes.length > 0) playVideo(data.episodes[0].id);
-            } catch(e) { alert("Load Error!"); }
-            showLoading(false);
-            window.scrollTo(0,0);
-        }
-
-        // বাকি ফাংশনগুলো আগের মতোই থাকবে (fetchTrending, searchAnime, playVideo)
+        // ১. ট্রেন্ডিং লোড
         async function fetchTrending() {
             showLoading(true);
             try {
-                const data = await fetchWithFallback('/top-airing');
-                displayAnime(data.results);
-            } catch (err) { alert("API Error!"); }
+                const data = await multiApiFetch('/top-airing');
+                renderGrid(data.results);
+            } catch (err) { alert("All API nodes offline. Contact developer."); }
             showLoading(false);
         }
 
-        function displayAnime(list) {
-            const grid = document.getElementById('animeGrid');
-            grid.innerHTML = '';
+        // ২. গ্রিড রেন্ডার
+        function renderGrid(list) {
+            animeGrid.innerHTML = '';
             list.forEach(anime => {
-                grid.innerHTML += `
-                    <div class="anime-card cursor-pointer group" onclick="loadAnimeDetails('${anime.id}', '${anime.title.replace(/'/g, "")}')">
-                        <div class="relative overflow-hidden rounded-2xl aspect-[3/4.5] bg-gray-900">
-                            <img src="${anime.image}" class="w-full h-full object-cover">
+                animeGrid.innerHTML += `
+                    <div class="anime-card cursor-pointer group flex flex-col" onclick="loadDetails('${anime.id}', '${anime.title.replace(/'/g, "")}')">
+                        <div class="relative overflow-hidden rounded-3xl aspect-[3/4.5] bg-[#0a0a0a] border border-white/5 shadow-2xl">
+                            <img src="${anime.image}" class="w-full h-full object-cover" loading="lazy">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
+                            <div class="absolute bottom-4 left-4">
+                                <span class="bg-[#57e3f2] text-black text-[9px] font-black px-2 py-1 rounded-md uppercase">Gogo</span>
+                            </div>
                         </div>
-                        <h3 class="mt-3 text-xs font-bold group-hover:text-[#57e3f2] transition line-clamp-2">${anime.title}</h3>
+                        <h3 class="mt-4 text-xs font-bold group-hover:text-[#57e3f2] transition duration-300 line-clamp-2 leading-snug px-1">${anime.title}</h3>
                     </div>`;
             });
         }
 
-        async function playVideo(episodeId) {
+        // ৩. এনিমে ডিটেইলস (Consumet + AniList)
+        async function loadDetails(id, title) {
+            showLoading(true);
             try {
-                const data = await fetchWithFallback(`/watch/${episodeId}`);
+                const [consData, aniData] = await Promise.all([
+                    multiApiFetch(`/info/${id}`),
+                    getAniListData(title)
+                ]);
+
+                document.getElementById('mainContent').classList.add('hidden');
+                document.getElementById('playerSection').classList.remove('hidden');
+                document.getElementById('playingTitle').innerText = title;
+
+                // AniList আপডেট
+                if (aniData) {
+                    document.getElementById('aniBanner').style.backgroundImage = `url(${aniData.bannerImage || aniData.coverImage.large})`;
+                    document.getElementById('aniPoster').src = aniData.coverImage.large;
+                    document.getElementById('animeDesc').innerHTML = aniData.description || "No plot synopsis.";
+                    document.getElementById('aniScore').innerText = aniData.averageScore ? `${aniData.averageScore}%` : "NR";
+                    document.getElementById('aniStatus').innerText = aniData.status;
+                    document.getElementById('aniGenres').innerHTML = aniData.genres.map(g => `<span class="bg-white/5 border border-white/5 text-[10px] px-3 py-1 rounded-full text-gray-400">${g}</span>`).join('');
+                }
+
+                const epList = document.getElementById('episodeList');
+                epList.innerHTML = '';
+                consData.episodes.forEach(ep => {
+                    epList.innerHTML += `<button onclick="playVideo('${ep.id}')" class="bg-[#111] hover:bg-[#57e3f2] hover:text-black border border-white/5 px-4 py-2 rounded-xl text-xs font-black transition-all shadow-md">EP ${ep.number}</button>`;
+                });
+
+                if (consData.episodes.length > 0) playVideo(consData.episodes[0].id);
+            } catch (e) { alert("Node Sync Error!"); }
+            showLoading(false);
+            window.scrollTo(0,0);
+        }
+
+        // ৪. ভিডিও প্লেয়ার
+        async function playVideo(epId) {
+            try {
+                const data = await multiApiFetch(`/watch/${epId}`);
                 document.getElementById('mainPlayer').src = data.headers.Referer || data.sources[0].url;
-            } catch(e) { alert("Video Error!"); }
+            } catch (e) { alert("Video Node Error!"); }
+        }
+
+        // ৫. সার্চ
+        async function searchAnime() {
+            const query = document.getElementById('searchInput').value;
+            if(!query) return;
+            showLoading(true);
+            document.getElementById('listTitle').innerText = `Search: ${query}`;
+            try {
+                const data = await multiApiFetch(`/${query}`);
+                renderGrid(data.results);
+            } catch(e) { alert("Search Nodes Failed."); }
+            showLoading(false);
         }
 
         function closePlayer() {
             document.getElementById('mainContent').classList.remove('hidden');
             document.getElementById('playerSection').classList.add('hidden');
             document.getElementById('mainPlayer').src = '';
+            document.getElementById('listTitle').innerText = "Trending Now";
         }
 
-        function showLoading(s) { 
-            document.getElementById('loading').classList.toggle('hidden', !s);
-            if(s) document.getElementById('animeGrid').innerHTML = '';
+        function showLoading(s) {
+            loading.classList.toggle('hidden', !s);
+            if(s) animeGrid.innerHTML = '';
         }
 
+        document.getElementById('searchInput').addEventListener("keypress", (e) => { if(e.key === "Enter") searchAnime(); });
         window.onload = fetchTrending;
     </script>
 </body>
