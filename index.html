@@ -3,167 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieBox - Ultimate Streaming</title>
+    <title>Home Air TV - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0f1014; color: #fff; font-family: 'Inter', sans-serif; }
-        .server-btn { background: #1a1c23; border: 1px solid #2d3139; border-radius: 12px; padding: 10px; font-size: 11px; font-weight: 700; transition: 0.3s; text-align: left; position: relative; }
-        .server-btn:hover { border-color: #6366f1; background: #232631; }
-        .server-btn.active { background: #6366f1; border-color: #6366f1; color: white; }
-        .badge { font-size: 8px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); margin-left: 5px; opacity: 0.7; }
-        .movie-card:hover img { transform: scale(1.05); transition: 0.3s ease; }
-        .modal-bg { background: rgba(10, 11, 15, 0.98); backdrop-filter: blur(20px); }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
+        body { background: linear-gradient(to bottom, #ffffff, #f9faff); font-family: 'Inter', sans-serif; color: #333; }
+        .btn-3d { transition: all 0.2s; border-bottom: 5px solid rgba(0,0,0,0.2); }
+        .btn-3d:active { transform: translateY(4px); border-bottom-width: 1px; }
+        .bottom-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+        .orange-text { color: #ff5e00; }
+        .orange-bg { background-color: #ff5e00; }
+        .nav-item.active { color: #ff5e00; border-top: 3px solid #ff5e00; }
     </style>
 </head>
-<body>
+<body class="min-h-screen pb-24">
 
-    <!-- Header -->
-    <nav class="bg-[#16171d] p-4 sticky top-0 z-[100] border-b border-white/5">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-black text-indigo-500 tracking-tighter cursor-pointer" onclick="location.reload()">MOVIE<span class="text-white">BOX</span></h1>
-            <div class="relative w-1/2">
-                <input id="searchInput" type="text" placeholder="Search movies..." class="w-full bg-[#0f1014] p-2.5 pl-5 rounded-xl outline-none border border-white/10 focus:border-indigo-500 transition text-sm">
-                <button onclick="searchMovie()" class="absolute right-4 top-2.5 text-indigo-500"><i class="fa fa-search"></i></button>
+    <!-- Top Header -->
+    <header class="p-4 flex justify-between items-center bg-white/50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-orange-200">
+                <i class="fa fa-tv text-lg"></i>
             </div>
+            <div>
+                <h1 class="text-lg font-black tracking-tight leading-none uppercase">Home Air <span class="text-xs bg-orange-100 text-orange-600 px-1 rounded">TV</span></h1>
+                <p class="text-[8px] text-gray-400 font-bold tracking-widest uppercase">Future Live IPTV Player</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="bg-gray-100 px-3 py-1 rounded-full flex items-center gap-2 text-[10px] font-bold text-gray-500">
+                <span class="flex items-center gap-1"><i class="fa fa-circle text-orange-500 text-[6px]"></i> 1</span>
+                <span class="flex items-center gap-1"><i class="fa fa-users"></i> 1</span>
+            </div>
+            <img src="https://i.pravatar.cc/150?u=robiul" class="w-10 h-10 rounded-full border-2 border-white shadow-md">
+        </div>
+    </header>
+
+    <!-- Welcome Section -->
+    <section class="px-6 py-4">
+        <div class="inline-block bg-orange-50 text-orange-600 px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border border-orange-100 mb-4">
+            <i class="fa fa-wand-magic-sparkles mr-1"></i> System Online
+        </div>
+        <h2 class="text-3xl font-black mb-2">Welcome back, <span class="orange-text">MD Robiul Sorder!</span> 👋</h2>
+        <p class="text-gray-400 text-xs font-medium leading-relaxed">Ready to explore? Over 8000+ live IPTV stations are synced and waiting.</p>
+    </section>
+
+    <!-- Category Buttons Grid -->
+    <section class="px-6 grid grid-cols-2 gap-4 my-6">
+        <button class="btn-3d bg-blue-500 text-white p-4 rounded-2xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-blue-100">
+            <i class="fa fa-tv"></i> Live TV
+        </button>
+        <button class="btn-3d bg-emerald-500 text-white p-4 rounded-2xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-emerald-100">
+            <i class="fa fa-trophy"></i> Sports TV
+        </button>
+        <button class="btn-3d bg-cyan-500 text-white p-4 rounded-2xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-cyan-100">
+            <i class="fa fa-globe"></i> Home
+        </button>
+        <button class="btn-3d bg-indigo-500 text-white p-4 rounded-2xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-indigo-100">
+            <i class="fa fa-film"></i> Movies
+        </button>
+        <button class="btn-3d bg-pink-500 text-white p-4 rounded-2xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-pink-100">
+            <i class="fa fa-desktop"></i> TV Shows
+        </button>
+        <button class="btn-3d bg-orange-500 text-white p-4 rounded-2xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-orange-100">
+            <i class="fa fa-wand-magic-sparkles"></i> Anime
+        </button>
+        <button class="btn-3d bg-purple-600 text-white p-4 rounded-2xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-purple-100 col-span-2">
+            <i class="fa fa-layer-group"></i> IPTV Playlist
+        </button>
+    </section>
+
+    <!-- Control Section -->
+    <section class="px-6 space-y-4">
+        <button class="w-full bg-white border border-gray-100 p-4 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm text-gray-500">
+            <i class="fa fa-moon"></i> NIGHT MODE
+        </button>
+
+        <!-- Time Section -->
+        <div class="bg-gray-50/50 border border-gray-100 p-6 rounded-[40px] text-center shadow-inner mt-6">
+            <p class="text-[8px] text-gray-400 font-black uppercase tracking-[0.3em] mb-2">Current Local Time</p>
+            <h3 id="clock" class="text-4xl font-black orange-text italic">00:00:00 PM</h3>
+            <p class="text-[8px] text-gray-400 font-bold uppercase mt-1">EDT / GMT-4</p>
+        </div>
+    </section>
+
+    <!-- Floating Ask Me -->
+    <div class="fixed bottom-24 right-4 z-[150]">
+        <div class="bg-orange-600 p-3 rounded-full shadow-xl shadow-orange-200 relative">
+            <i class="fa fa-comment-dots text-white text-xl"></i>
+            <div class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></div>
+        </div>
+        <div class="bg-black text-white text-[8px] font-black px-2 py-1 rounded-md mt-2 text-center uppercase tracking-tighter">Ask Me?</div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 p-4 flex justify-between items-center bottom-nav border-t border-gray-100 z-[200]">
+        <div class="flex flex-col items-center gap-1 nav-item active pt-2">
+            <i class="fa fa-th-large text-xl"></i>
+            <span class="text-[8px] font-black uppercase">Dashboard</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 text-gray-400">
+            <i class="fa fa-tv text-xl"></i>
+            <span class="text-[8px] font-black uppercase">Stream</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 text-gray-400">
+            <i class="fa fa-compass text-xl"></i>
+            <span class="text-[8px] font-black uppercase">Browse</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 text-gray-400">
+            <i class="fa fa-film text-xl"></i>
+            <span class="text-[8px] font-black uppercase">Cinema</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 text-gray-400">
+            <i class="fa fa-heart text-xl"></i>
+            <span class="text-[8px] font-black uppercase">Favorites</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 text-gray-400">
+            <i class="fa fa-broadcast-tower text-xl"></i>
+            <span class="text-[8px] font-black uppercase">Remote</span>
         </div>
     </nav>
 
-    <!-- Movie Listing -->
-    <main class="p-6 max-w-7xl mx-auto">
-        <h2 id="listTitle" class="text-xl font-bold mb-8 border-l-4 border-indigo-500 pl-4 uppercase tracking-widest">Trending Now</h2>
-        <div id="movieGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            <!-- Movie cards load here -->
-        </div>
-    </main>
-
-    <!-- Player Modal (আপনার স্ক্রিনশটের মতো সার্ভার লিস্ট সহ) -->
-    <div id="playerModal" class="fixed inset-0 z-[200] modal-bg hidden overflow-y-auto">
-        <div class="max-w-5xl mx-auto my-5 p-4">
-            <div class="flex justify-between items-center mb-4">
-                <h2 id="playingTitle" class="text-lg font-bold truncate"></h2>
-                <button onclick="closePlayer()" class="text-white bg-indigo-600 px-4 py-1 rounded-lg text-sm font-bold">CLOSE</button>
-            </div>
-
-            <!-- Main Player -->
-            <div class="aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10 mb-8">
-                <iframe id="mainPlayer" src="" class="w-full h-full" allowfullscreen frameborder="0" allow="autoplay; encrypted-media"></iframe>
-            </div>
-
-            <!-- Server Source Section (স্ক্রিনশটের মতো হুবহু লিস্ট) -->
-            <div class="bg-[#16171d] p-6 rounded-3xl border border-white/5">
-                <div class="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
-                    <div class="flex items-center gap-2">
-                        <i class="fa fa-server text-indigo-500"></i>
-                        <span class="text-xs font-black uppercase tracking-widest text-gray-400">Movie Server Source</span>
-                    </div>
-                    <span class="text-[10px] text-indigo-400 font-bold bg-indigo-500/10 px-2 py-1 rounded">Minimize <i class="fa fa-chevron-up"></i></span>
-                </div>
-
-                <div id="serverList" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <!-- Servers (আপনার স্ক্রিনশটের নামগুলো এখানে) -->
-                    <button onclick="changeServer('vidsrc_to')" class="server-btn active">VidSrc.to <span class="badge">HD</span></button>
-                    <button onclick="changeServer('vidsrc_me')" class="server-btn">VidSrc.me <span class="badge">M3U8 Multi</span></button>
-                    <button onclick="changeServer('smashy')" class="server-btn">SmashyStream <span class="badge">Multi-Stream</span></button>
-                    <button onclick="changeServer('vidlink')" class="server-btn">VidLink Pro <span class="badge">4K HDR</span></button>
-                    <button onclick="changeServer('embedsu')" class="server-btn">Embed.su <span class="badge">4K Multi-Sub</span></button>
-                    <button onclick="changeServer('vsrc_su')" class="server-btn">VSrc SU <span class="badge">Live</span></button>
-                    <button onclick="changeServer('vidzee')" class="server-btn">VidZee <span class="badge">AES-GCM Multi</span></button>
-                    <button onclick="changeServer('vidrock')" class="server-btn">VidRock <span class="badge">AES-CBC API</span></button>
-                    <button onclick="changeServer('vidnest')" class="server-btn">VidNest <span class="badge">Custom Base64</span></button>
-                    <button onclick="changeServer('anyembed')" class="server-btn">AnyEmbed <span class="badge">Session API</span></button>
-                    <button onclick="changeServer('vixsrc')" class="server-btn">VixSrc <span class="badge">Token Scraper</span></button>
-                    <button onclick="changeServer('cinesu')" class="server-btn">CineSu <span class="badge">HLS 1080p</span></button>
-                    <button onclick="changeServer('videasy')" class="server-btn">Videasy <span class="badge">Decrypted Multi</span></button>
-                    <button onclick="changeServer('vidsrc_vip')" class="server-btn">VidSrc VIP <span class="badge">VIP</span></button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        const API_KEY = '5f49df7f2945d7d3b0a68f566085a67c';
-        const BASE_URL = 'https://api.themoviedb.org/3';
-        const IMG_URL = 'https://image.tmdb.org/t/p/w500';
-
-        let currentId = '';
-        let currentType = 'movie';
-
-        async function fetchTrending() {
-            const res = await fetch(`${BASE_URL}/trending/all/week?api_key=${API_KEY}`);
-            const data = await res.json();
-            renderMovies(data.results);
+        // Clock Function
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            const strTime = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+            document.getElementById('clock').textContent = strTime;
         }
-
-        function renderMovies(list) {
-            const grid = document.getElementById('movieGrid');
-            grid.innerHTML = '';
-            list.forEach(item => {
-                if(!item.poster_path) return;
-                const title = item.title || item.name;
-                const type = item.media_type || 'movie';
-                grid.innerHTML += `
-                    <div class="movie-card cursor-pointer group flex flex-col" onclick="openPlayer('${item.id}', '${type}', '${title.replace(/'/g, "")}')">
-                        <div class="relative overflow-hidden rounded-2xl aspect-[2/3] bg-[#1a1c23] shadow-lg border border-white/5">
-                            <img src="${IMG_URL + item.poster_path}" class="w-full h-full object-cover">
-                            <div class="absolute bottom-3 left-3 bg-indigo-600 text-white text-[8px] font-black px-2 py-0.5 rounded uppercase">${type}</div>
-                        </div>
-                        <h3 class="mt-3 text-xs font-bold group-hover:text-indigo-400 transition line-clamp-2">${title}</h3>
-                    </div>`;
-            });
-        }
-
-        function openPlayer(id, type, title) {
-            currentId = id;
-            currentType = type;
-            document.getElementById('playingTitle').innerText = title;
-            document.getElementById('playerModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-            changeServer('vidsrc_to');
-        }
-
-        // সার্ভার সুইচার (সব সোর্স এখানে কনফিগার করা)
-        function changeServer(server) {
-            const iframe = document.getElementById('mainPlayer');
-            let url = '';
-
-            switch(server) {
-                case 'vidsrc_to': url = `https://vidsrc.to/embed/${currentType}/${currentId}`; break;
-                case 'vidsrc_me': url = `https://vidsrc.me/embed/${currentType}?tmdb=${currentId}`; break;
-                case 'smashy': url = `https://embed.smashystream.com/play/${currentType}?tmdb=${currentId}`; break;
-                case 'vidlink': url = `https://vidlink.pro/${currentType}/${currentId}`; break;
-                case 'embedsu': url = `https://embed.su/embed/${currentType}/${currentId}`; break;
-                case 'vsrc_su': url = `https://vsrc.su/embed/${currentType}/${currentId}`; break;
-                case 'vidzee': url = `https://vidzee.me/embed/${currentType}/${currentId}`; break;
-                default: url = `https://vidsrc.to/embed/${currentType}/${currentId}`;
-            }
-
-            iframe.src = url;
-
-            // বাটন ডিজাইন পরিবর্তন
-            const btns = document.querySelectorAll('.server-btn');
-            btns.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-        }
-
-        async function searchMovie() {
-            const query = document.getElementById('searchInput').value;
-            if(!query) return;
-            const res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${query}`);
-            const data = await res.json();
-            renderMovies(data.results);
-        }
-
-        function closePlayer() {
-            document.getElementById('playerModal').classList.add('hidden');
-            document.getElementById('mainPlayer').src = '';
-            document.body.style.overflow = 'auto';
-        }
-
-        document.getElementById('searchInput').addEventListener("keypress", (e) => { if (e.key === "Enter") searchMovie(); });
-        window.onload = fetchTrending;
+        setInterval(updateClock, 1000);
+        updateClock();
     </script>
 </body>
 </html>
