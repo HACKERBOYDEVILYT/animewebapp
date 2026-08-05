@@ -1,1 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Air TV - Master Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f7fe; font-family: 'Inter', sans-serif; }
+        .admin-card { background: white; border-radius: 24px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
+        .sidebar { background: #1a1c23; color: white; height: 100vh; position: fixed; width: 260px; left: -260px; transition: 0.3s; z-index: 1000; }
+        .sidebar.active { left: 0; }
+        .orange-bg { background: #ff5e00; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    </style>
+</head>
+<body class="overflow-x-hidden">
 
+    <!-- Admin Login Protection (এটি প্রথমে আসবে) -->
+    <div id="adminAuth" class="fixed inset-0 z-[2000] bg-[#1a1c23] flex items-center justify-center p-6">
+        <div class="w-full max-w-sm text-center">
+            <div class="w-20 h-20 orange-bg rounded-3xl mx-auto mb-6 flex items-center justify-center text-white text-3xl shadow-2xl shadow-orange-500/20">
+                <i class="fa fa-shield-halved"></i>
+            </div>
+            <h2 class="text-white text-2xl font-black mb-2 uppercase tracking-tighter">Master Control</h2>
+            <p class="text-gray-500 text-[10px] font-bold uppercase tracking-[0.3em] mb-8">Admin Verification Required</p>
+            <input id="adminPass" type="password" placeholder="Admin Secret Key" class="w-full bg-[#242731] p-4 rounded-2xl outline-none border border-transparent focus:border-orange-500 text-white text-center font-bold mb-4">
+            <button onclick="verifyAdmin()" class="w-full orange-bg text-white p-4 rounded-2xl font-black uppercase tracking-widest text-xs active:scale-95 transition">Verify & Enter</button>
+        </div>
+    </div>
+
+    <!-- Main Admin Dashboard -->
+    <div id="adminPanel" class="hidden">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar p-6 shadow-2xl">
+            <h1 class="text-xl font-black mb-10 text-orange-500 italic">ADMIN <span class="text-white">NODE</span></h1>
+            <nav class="space-y-6">
+                <div class="text-gray-400 flex items-center gap-4 cursor-pointer hover:text-white transition"><i class="fa fa-chart-line"></i> Dashboard</div>
+                <div class="text-gray-400 flex items-center gap-4 cursor-pointer hover:text-white transition"><i class="fa fa-tv"></i> Manage Streams</div>
+                <div class="text-gray-400 flex items-center gap-4 cursor-pointer hover:text-white transition"><i class="fa fa-users"></i> User Logs</div>
+                <div class="text-gray-400 flex items-center gap-4 cursor-pointer hover:text-white transition"><i class="fa fa-gears"></i> Server Settings</div>
+            </nav>
+            <button onclick="adminLogout()" class="absolute bottom-10 left-6 text-red-400 font-bold uppercase text-[10px] tracking-widest"><i class="fa fa-power-off mr-2"></i> Logout System</button>
+        </div>
+
+        <!-- Top Nav -->
+        <header class="p-4 bg-white border-b flex justify-between items-center sticky top-0 z-[500]">
+            <button onclick="toggleSidebar()" class="text-gray-500 text-xl"><i class="fa fa-bars-staggered"></i></button>
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden md:block">
+                    <p class="text-xs font-black uppercase">Robiul Sorder</p>
+                    <p class="text-[8px] text-orange-500 font-bold">Main Developer</p>
+                </div>
+                <img src="https://i.pravatar.cc/150?u=robiul" class="w-10 h-10 rounded-full border-2 border-orange-500">
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-6">
+            <h2 class="text-2xl font-black mb-6 italic">System <span class="text-orange-500">Overview</span></h2>
+
+            <!-- Stat Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="admin-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Total Streams</p>
+                            <h3 class="text-3xl font-black">8,420+</h3>
+                        </div>
+                        <div class="p-3 bg-blue-50 text-blue-500 rounded-xl"><i class="fa fa-play"></i></div>
+                    </div>
+                </div>
+                <div class="admin-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Active Users</p>
+                            <h3 class="text-3xl font-black">124</h3>
+                        </div>
+                        <div class="p-3 bg-emerald-50 text-emerald-500 rounded-xl"><i class="fa fa-users"></i></div>
+                    </div>
+                </div>
+                <div class="admin-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Server Load</p>
+                            <h3 class="text-3xl font-black">14%</h3>
+                        </div>
+                        <div class="p-3 bg-orange-50 text-orange-500 rounded-xl"><i class="fa fa-server"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Server Status & Logs -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="admin-card">
+                    <h4 class="font-black mb-4 uppercase text-xs tracking-widest">Live API Nodes</h4>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                            <span class="text-xs font-bold">Consumet Node-01</span>
+                            <span class="text-[10px] text-emerald-500 font-bold"><span class="status-dot bg-emerald-500 mr-1"></span> ONLINE</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                            <span class="text-xs font-bold">Gogo Streaming API</span>
+                            <span class="text-[10px] text-emerald-500 font-bold"><span class="status-dot bg-emerald-500 mr-1"></span> ONLINE</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                            <span class="text-xs font-bold">VidSrc Source Pool</span>
+                            <span class="text-[10px] text-orange-500 font-bold"><span class="status-dot bg-orange-500 mr-1"></span> BUSY</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <h4 class="font-black mb-4 uppercase text-xs tracking-widest">Global Notice</h4>
+                    <textarea class="w-full bg-gray-50 p-4 rounded-2xl outline-none border text-xs font-medium h-32 mb-4" placeholder="Update site alert message..."></textarea>
+                    <button class="w-full bg-black text-white p-3 rounded-xl font-bold uppercase text-[10px] tracking-widest">Push Update</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const ADMIN_SECRET = "9999"; // আপনার গোপন পাসওয়ার্ড
+
+        function verifyAdmin() {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === ADMIN_SECRET) {
+                sessionStorage.setItem('admin_verified', 'true');
+                showPanel();
+            } else {
+                alert("Unauthorized Access!");
+            }
+        }
+
+        function showPanel() {
+            if (sessionStorage.getItem('admin_verified') === 'true') {
+                document.getElementById('adminAuth').classList.add('hidden');
+                document.getElementById('adminPanel').classList.remove('hidden');
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        function adminLogout() {
+            sessionStorage.removeItem('admin_verified');
+            location.reload();
+        }
+
+        window.onload = showPanel;
+    </script>
+</body>
+</html>
