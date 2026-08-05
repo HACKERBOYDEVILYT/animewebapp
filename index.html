@@ -8,19 +8,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background: linear-gradient(to bottom, #ffffff, #f9faff); font-family: 'Inter', sans-serif; color: #333; }
-        .btn-3d { transition: all 0.2s; border-bottom: 5px solid rgba(0,0,0,0.2); }
+        .btn-3d { transition: all 0.2s; border-bottom: 5px solid rgba(0,0,0,0.1); }
         .btn-3d:active { transform: translateY(4px); border-bottom-width: 1px; }
+        .modal-blur { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(10px); }
+        .card-item { background: white; border: 1px solid #f0f0f0; border-radius: 20px; transition: 0.2s; }
+        .card-item:hover { border-color: #ff5e00; }
         .orange-text { color: #ff5e00; }
         .orange-bg { background-color: #ff5e00; }
-        .modal-blur { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); }
     </style>
 </head>
 <body class="min-h-screen pb-24 overflow-x-hidden">
 
     <!-- Header -->
-    <header class="p-4 flex justify-between items-center bg-white/60 sticky top-0 z-50 backdrop-blur-md border-b border-gray-100">
+    <header class="p-4 flex justify-between items-center bg-white/60 sticky top-0 z-[100] backdrop-blur-md">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 orange-bg rounded-full flex items-center justify-center text-white shadow-lg shadow-orange-200">
+            <div class="w-10 h-10 orange-bg rounded-full flex items-center justify-center text-white shadow-lg">
                 <i class="fa fa-tv text-lg"></i>
             </div>
             <div>
@@ -29,163 +31,133 @@
             </div>
         </div>
 
-        <!-- Profile Section (এখানে টিপ দিলে লগইন আসবে) -->
-        <div class="flex items-center gap-2">
-            <div id="userBadge" class="hidden bg-orange-50 px-2 py-1 rounded-full flex items-center gap-1 text-[9px] font-black text-orange-600 border border-orange-100">
-                <i class="fa fa-circle text-[5px]"></i> ONLINE
-            </div>
-            <div onclick="handleProfileClick()" class="cursor-pointer relative">
-                <img id="profileImg" src="https://www.w3schools.com/howto/img_avatar.png" class="w-10 h-10 rounded-full border-2 border-white shadow-md hover:border-orange-500 transition-all">
-                <div id="loginIndicator" class="absolute -bottom-1 -right-1 w-4 h-4 bg-gray-200 border-2 border-white rounded-full flex items-center justify-center">
-                    <i class="fa fa-lock text-[8px] text-gray-400"></i>
-                </div>
-            </div>
+        <div onclick="toggleProfileModal()" class="cursor-pointer relative">
+            <img src="https://i.pravatar.cc/150?u=robiul" class="w-10 h-10 rounded-full border-2 border-white shadow-md">
+            <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
         </div>
     </header>
 
-    <!-- Welcome Section -->
+    <!-- Main Content (Static UI) -->
     <section class="px-6 py-8">
-        <div class="inline-block bg-orange-50 text-orange-600 px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border border-orange-100 mb-4">
-            <i class="fa fa-wand-magic-sparkles mr-1"></i> System Online
-        </div>
-        <h2 class="text-3xl font-black mb-2 leading-tight">Welcome back,<br><span id="displayUser" class="orange-text italic">Guest User!</span> 👋</h2>
-        <p class="text-gray-400 text-xs font-medium leading-relaxed max-w-[250px]">Explore over 8000+ live IPTV stations synced and waiting for you.</p>
+        <h2 class="text-3xl font-black mb-2 leading-tight">Welcome back,<br><span class="orange-text italic">MD Robiul Sorder!</span> 👋</h2>
+        <p class="text-gray-400 text-xs font-medium leading-relaxed">Ready to explore? Your 8000+ stations are synced.</p>
     </section>
 
-    <!-- Category Buttons (Your colorful 3D buttons) -->
-    <section class="px-6 grid grid-cols-2 gap-4 my-6">
-        <button class="btn-3d bg-blue-500 text-white p-5 rounded-3xl flex items-center gap-2 font-bold text-sm shadow-xl shadow-blue-100">
-            <i class="fa fa-tv"></i> Live TV
-        </button>
-        <button class="btn-3d bg-emerald-500 text-white p-5 rounded-3xl flex items-center gap-2 font-bold text-sm shadow-xl shadow-emerald-100">
-            <i class="fa fa-trophy"></i> Sports
-        </button>
-        <button class="btn-3d bg-indigo-500 text-white p-5 rounded-3xl flex items-center gap-2 font-bold text-sm shadow-xl shadow-indigo-100">
-            <i class="fa fa-film"></i> Movies
-        </button>
-        <button class="btn-3d bg-orange-500 text-white p-5 rounded-3xl flex items-center gap-2 font-bold text-sm shadow-xl shadow-orange-100">
-            <i class="fa fa-wand-magic-sparkles"></i> Anime
-        </button>
-        <button class="btn-3d bg-purple-600 text-white p-5 rounded-3xl flex items-center gap-2 font-bold text-sm shadow-xl shadow-purple-100 col-span-2">
-            <i class="fa fa-layer-group"></i> IPTV Playlist
-        </button>
+    <!-- Category Grid -->
+    <section class="px-6 grid grid-cols-2 gap-4">
+        <button class="btn-3d bg-blue-500 text-white p-5 rounded-3xl flex items-center gap-2 font-bold text-sm shadow-xl shadow-blue-100"><i class="fa fa-tv"></i> Live TV</button>
+        <button class="btn-3d bg-emerald-500 text-white p-5 rounded-3xl flex items-center gap-2 font-bold text-sm shadow-xl shadow-emerald-100"><i class="fa fa-trophy"></i> Sports</button>
+        <button class="btn-3d bg-indigo-500 text-white p-5 rounded-3xl flex items-center gap-2 font-bold text-sm shadow-xl shadow-indigo-100"><i class="fa fa-film"></i> Movies</button>
+        <button class="btn-3d bg-orange-500 text-white p-5 rounded-3xl flex items-center gap-2 font-bold text-sm shadow-xl shadow-orange-100"><i class="fa fa-wand-magic-sparkles"></i> Anime</button>
     </section>
 
-    <!-- Time Section -->
-    <section class="px-6 mt-10">
-        <div class="bg-gray-50/50 p-8 rounded-[40px] text-center border border-gray-100 shadow-inner">
-            <p class="text-[8px] text-gray-400 font-black uppercase tracking-[0.3em] mb-2">Current Local Time</p>
-            <h3 id="clock" class="text-4xl font-black orange-text italic">00:00:00 PM</h3>
-        </div>
-    </section>
-
-    <!-- Login Modal (প্রোফাইলে টিপ দিলে আসবে) -->
-    <div id="loginModal" class="fixed inset-0 z-[1000] hidden flex items-center justify-center p-6 modal-blur">
-        <div class="bg-white w-full max-w-sm rounded-[40px] p-10 shadow-2xl relative">
-            <button onclick="closeModal()" class="absolute top-6 right-6 text-gray-300 hover:text-orange-500"><i class="fa fa-times text-2xl"></i></button>
+    <!-- Profile Modal (আপনার স্ক্রিনশটের মতো হুবহু ডিজাইন) -->
+    <div id="profileModal" class="fixed inset-0 z-[1000] hidden flex items-end md:items-center justify-center modal-blur p-4">
+        <div class="bg-white w-full max-w-sm rounded-[40px] p-8 shadow-2xl relative animate-slide-up">
             
+            <!-- Close Button -->
+            <button onclick="toggleProfileModal()" class="absolute top-6 right-6 text-gray-300 hover:text-orange-500 transition">
+                <i class="fa fa-times text-xl"></i>
+            </button>
+
+            <!-- Profile Header -->
             <div class="text-center mb-8">
-                <div class="w-16 h-16 orange-bg rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl shadow-xl shadow-orange-200">
-                    <i class="fa fa-user-lock"></i>
+                <div class="relative inline-block">
+                    <img src="https://i.pravatar.cc/150?u=robiul" class="w-20 h-20 rounded-full border-4 border-white shadow-xl mx-auto">
+                    <div class="absolute inset-0 rounded-full border-2 border-orange-500/20 animate-pulse"></div>
                 </div>
-                <h3 class="text-2xl font-black">User Login</h3>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Access your private station</p>
+                <h3 class="text-xl font-black mt-4">MD Robiul Sorder</h3>
+                <p class="text-xs text-gray-400 font-medium border-b border-gray-100 pb-2 inline-block">ayanislam10000@gmail.com</p>
+                <div class="mt-3">
+                    <span class="bg-emerald-50 text-emerald-600 text-[8px] font-black px-4 py-1.5 rounded-full border border-emerald-100 uppercase tracking-widest">
+                        <i class="fa fa-circle text-[6px] mr-1"></i> Connected with Firestore
+                    </span>
+                </div>
             </div>
 
-            <div class="space-y-4">
-                <input id="uName" type="text" placeholder="Username" class="w-full bg-gray-50 p-4 rounded-2xl outline-none border border-transparent focus:border-orange-500 text-sm font-medium">
-                <input id="uPass" type="password" placeholder="Password" class="w-full bg-gray-50 p-4 rounded-2xl outline-none border border-transparent focus:border-orange-500 text-sm font-medium">
-                <button onclick="handleLogin()" class="w-full orange-bg text-white p-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-orange-200 active:scale-95 transition">Sign In</button>
-                <button id="logoutBtn" onclick="handleLogout()" class="hidden w-full bg-red-100 text-red-600 p-4 rounded-2xl font-black uppercase tracking-widest text-xs">Logout</button>
+            <!-- List Menu (স্ক্রিনশটের মতো কার্ডস) -->
+            <div class="space-y-3 mb-8">
+                <div class="card-item p-4 flex justify-between items-center shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <i class="fa fa-sun text-orange-400"></i>
+                        <span class="text-xs font-bold">Theme Mode</span>
+                    </div>
+                    <span class="bg-orange-50 text-orange-600 text-[8px] font-black px-2 py-1 rounded">LIGHT (DAY)</span>
+                </div>
+
+                <div class="card-item p-4 flex justify-between items-center shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <i class="fa fa-mobile-screen text-emerald-500"></i>
+                        <span class="text-xs font-bold text-emerald-600">Download Android App</span>
+                    </div>
+                    <span class="text-[8px] font-black text-gray-300">V4.6</span>
+                </div>
+
+                <div class="card-item p-4 flex justify-between items-center shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <i class="fa fa-history text-orange-500"></i>
+                        <span class="text-xs font-bold">Stream History</span>
+                    </div>
+                    <span class="text-[8px] font-bold text-gray-300">View All</span>
+                </div>
+
+                <div class="card-item p-4 flex justify-between items-center shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <i class="fa fa-gear text-orange-400"></i>
+                        <span class="text-xs font-bold">Player Preferences</span>
+                    </div>
+                    <span class="text-[8px] font-bold text-gray-300">Settings</span>
+                </div>
             </div>
+
+            <!-- Quick Preferences -->
+            <div class="px-2 mb-8">
+                <p class="text-[8px] text-gray-400 font-black uppercase tracking-[0.2em] mb-4">Quick Preferences</p>
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa fa-clock text-gray-400 text-xs"></i>
+                        <span class="text-xs font-bold text-gray-600">Ultra Low Latency</span>
+                    </div>
+                    <span class="text-[10px] font-black text-orange-500">ENABLED</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <i class="fa fa-play-circle text-gray-400 text-xs"></i>
+                        <span class="text-xs font-bold text-gray-600">Autoplay Stream</span>
+                    </div>
+                    <span class="text-[10px] font-black text-orange-500">ENABLED</span>
+                </div>
+            </div>
+
+            <!-- Logout Button -->
+            <button class="w-full bg-red-50 text-red-600 p-4 rounded-3xl font-black uppercase tracking-widest text-[10px] border border-red-100 flex items-center justify-center gap-2 hover:bg-red-600 hover:text-white transition">
+                <i class="fa fa-sign-out-alt"></i> Disconnect Account
+            </button>
+
+            <!-- Version Info -->
+            <p class="text-center mt-6 text-[8px] text-gray-300 font-bold uppercase tracking-widest">Web App Engine V4.6</p>
         </div>
     </div>
 
     <!-- Bottom Nav -->
-    <nav class="fixed bottom-0 left-0 right-0 p-4 flex justify-between items-center bg-white/80 backdrop-blur-md border-t border-gray-100 z-50">
-        <div class="flex flex-col items-center gap-1 orange-text"><i class="fa fa-th-large text-xl"></i><span class="text-[8px] font-black uppercase">Dashboard</span></div>
-        <div class="flex flex-col items-center gap-1 text-gray-300"><i class="fa fa-tv text-xl"></i></div>
-        <div class="flex flex-col items-center gap-1 text-gray-300"><i class="fa fa-compass text-xl"></i></div>
-        <div class="flex flex-col items-center gap-1 text-gray-300"><i class="fa fa-user text-xl"></i></div>
+    <nav class="fixed bottom-0 left-0 right-0 p-4 flex justify-between items-center bg-white/80 backdrop-blur-md border-t border-gray-100 z-[200]">
+        <div class="flex flex-col items-center gap-1 text-orange-500"><i class="fa fa-th-large text-xl"></i><span class="text-[8px] font-black uppercase">Dashboard</span></div>
+        <div class="text-gray-300"><i class="fa fa-tv text-xl"></i></div>
+        <div class="text-gray-300"><i class="fa fa-compass text-xl"></i></div>
+        <div class="text-gray-300"><i class="fa fa-film text-xl"></i></div>
+        <div class="text-gray-300"><i class="fa fa-heart text-xl"></i></div>
     </nav>
 
     <script>
-        // পার্সোনাল লগইন ডাটা
-        const ADMIN_USER = "admin";
-        const ADMIN_PASS = "1234";
-
-        // প্রোফাইল আইকনে ক্লিক করলে যা হবে
-        function handleProfileClick() {
-            const modal = document.getElementById('loginModal');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const isLoggedIn = localStorage.getItem('tv_logged') === 'true';
-
-            modal.classList.remove('hidden');
-            
-            if(isLoggedIn) {
-                logoutBtn.classList.remove('hidden'); // লগইন থাকলে লগআউট বাটন দেখাবে
+        function toggleProfileModal() {
+            const modal = document.getElementById('profileModal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                document.body.style.overflow = 'hidden';
             } else {
-                logoutBtn.classList.add('hidden');
+                document.body.style.overflow = 'auto';
             }
         }
-
-        function handleLogin() {
-            const user = document.getElementById('uName').value;
-            const pass = document.getElementById('uPass').value;
-
-            if(user === ADMIN_USER && pass === ADMIN_PASS) {
-                localStorage.setItem('tv_logged', 'true');
-                localStorage.setItem('tv_name', user);
-                location.reload();
-            } else {
-                alert("Wrong Username or Password!");
-            }
-        }
-
-        function handleLogout() {
-            localStorage.removeItem('tv_logged');
-            localStorage.removeItem('tv_name');
-            location.reload();
-        }
-
-        function closeModal() {
-            document.getElementById('loginModal').classList.add('hidden');
-        }
-
-        function checkStatus() {
-            const logged = localStorage.getItem('tv_logged') === 'true';
-            const name = localStorage.getItem('tv_name');
-            const display = document.getElementById('displayUser');
-            const badge = document.getElementById('userBadge');
-            const indicator = document.getElementById('loginIndicator');
-            const profileImg = document.getElementById('profileImg');
-
-            if(logged) {
-                display.innerText = name.toUpperCase() + "!";
-                badge.classList.remove('hidden');
-                indicator.innerHTML = '<i class="fa fa-check text-[8px] text-white"></i>';
-                indicator.classList.replace('bg-gray-200', 'bg-emerald-500');
-                profileImg.src = "https://i.pravatar.cc/150?u=robiul"; // লগইন করলে আসল ছবি
-            } else {
-                display.innerText = "Guest User!";
-                badge.classList.add('hidden');
-            }
-        }
-
-        function updateClock() {
-            const now = new Date();
-            let h = now.getHours();
-            let m = now.getMinutes();
-            let s = now.getSeconds();
-            const ampm = h >= 12 ? 'PM' : 'AM';
-            h = h % 12 || 12;
-            m = m < 10 ? '0'+m : m;
-            s = s < 10 ? '0'+s : s;
-            document.getElementById('clock').innerText = `${h}:${m}:${s} ${ampm}`;
-        }
-
-        setInterval(updateClock, 1000);
-        window.onload = () => { checkStatus(); updateClock(); };
     </script>
 </body>
 </html>
