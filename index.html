@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Air TV - Private Dashboard</title>
+    <title>Home Air TV - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -12,131 +12,166 @@
         .btn-3d:active { transform: translateY(4px); border-bottom-width: 1px; }
         .orange-text { color: #ff5e00; }
         .orange-bg { background-color: #ff5e00; }
-        .hidden-content { display: none; }
+        .modal-blur { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); }
     </style>
 </head>
 <body class="min-h-screen pb-24 overflow-x-hidden">
 
-    <!-- Login Screen (এটি প্রথমে দেখাবে) -->
-    <div id="loginPage" class="fixed inset-0 z-[2000] bg-white flex items-center justify-center p-6">
-        <div class="w-full max-w-sm text-center">
-            <div class="w-20 h-20 orange-bg rounded-[30px] mx-auto mb-6 flex items-center justify-center text-white text-3xl shadow-2xl shadow-orange-200">
-                <i class="fa fa-user-lock"></i>
+    <!-- Header -->
+    <header class="p-4 flex justify-between items-center bg-white/60 sticky top-0 z-50 backdrop-blur-md border-b border-gray-100">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 orange-bg rounded-full flex items-center justify-center text-white shadow-lg shadow-orange-200">
+                <i class="fa fa-tv text-lg"></i>
             </div>
-            <h2 class="text-3xl font-black italic mb-2">Home Air <span class="orange-text text-sm bg-orange-50 px-2 rounded">TV</span></h2>
-            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em] mb-10">Private Access Only</p>
+            <div>
+                <h1 class="text-lg font-black tracking-tight leading-none uppercase">Home Air <span class="text-[10px] orange-text italic">TV</span></h1>
+                <p class="text-[7px] text-gray-400 font-bold tracking-widest uppercase">Future IPTV Player</p>
+            </div>
+        </div>
+
+        <!-- Profile Section (এখানে টিপ দিলে লগইন আসবে) -->
+        <div class="flex items-center gap-2">
+            <div id="userBadge" class="hidden bg-orange-50 px-2 py-1 rounded-full flex items-center gap-1 text-[9px] font-black text-orange-600 border border-orange-100">
+                <i class="fa fa-circle text-[5px]"></i> ONLINE
+            </div>
+            <div onclick="handleProfileClick()" class="cursor-pointer relative">
+                <img id="profileImg" src="https://www.w3schools.com/howto/img_avatar.png" class="w-10 h-10 rounded-full border-2 border-white shadow-md hover:border-orange-500 transition-all">
+                <div id="loginIndicator" class="absolute -bottom-1 -right-1 w-4 h-4 bg-gray-200 border-2 border-white rounded-full flex items-center justify-center">
+                    <i class="fa fa-lock text-[8px] text-gray-400"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Welcome Section -->
+    <section class="px-6 py-8">
+        <div class="inline-block bg-orange-50 text-orange-600 px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border border-orange-100 mb-4">
+            <i class="fa fa-wand-magic-sparkles mr-1"></i> System Online
+        </div>
+        <h2 class="text-3xl font-black mb-2 leading-tight">Welcome back,<br><span id="displayUser" class="orange-text italic">Guest User!</span> 👋</h2>
+        <p class="text-gray-400 text-xs font-medium leading-relaxed max-w-[250px]">Explore over 8000+ live IPTV stations synced and waiting for you.</p>
+    </section>
+
+    <!-- Category Buttons (Your colorful 3D buttons) -->
+    <section class="px-6 grid grid-cols-2 gap-4 my-6">
+        <button class="btn-3d bg-blue-500 text-white p-5 rounded-3xl flex items-center gap-2 font-bold text-sm shadow-xl shadow-blue-100">
+            <i class="fa fa-tv"></i> Live TV
+        </button>
+        <button class="btn-3d bg-emerald-500 text-white p-5 rounded-3xl flex items-center gap-2 font-bold text-sm shadow-xl shadow-emerald-100">
+            <i class="fa fa-trophy"></i> Sports
+        </button>
+        <button class="btn-3d bg-indigo-500 text-white p-5 rounded-3xl flex items-center gap-2 font-bold text-sm shadow-xl shadow-indigo-100">
+            <i class="fa fa-film"></i> Movies
+        </button>
+        <button class="btn-3d bg-orange-500 text-white p-5 rounded-3xl flex items-center gap-2 font-bold text-sm shadow-xl shadow-orange-100">
+            <i class="fa fa-wand-magic-sparkles"></i> Anime
+        </button>
+        <button class="btn-3d bg-purple-600 text-white p-5 rounded-3xl flex items-center gap-2 font-bold text-sm shadow-xl shadow-purple-100 col-span-2">
+            <i class="fa fa-layer-group"></i> IPTV Playlist
+        </button>
+    </section>
+
+    <!-- Time Section -->
+    <section class="px-6 mt-10">
+        <div class="bg-gray-50/50 p-8 rounded-[40px] text-center border border-gray-100 shadow-inner">
+            <p class="text-[8px] text-gray-400 font-black uppercase tracking-[0.3em] mb-2">Current Local Time</p>
+            <h3 id="clock" class="text-4xl font-black orange-text italic">00:00:00 PM</h3>
+        </div>
+    </section>
+
+    <!-- Login Modal (প্রোফাইলে টিপ দিলে আসবে) -->
+    <div id="loginModal" class="fixed inset-0 z-[1000] hidden flex items-center justify-center p-6 modal-blur">
+        <div class="bg-white w-full max-w-sm rounded-[40px] p-10 shadow-2xl relative">
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-gray-300 hover:text-orange-500"><i class="fa fa-times text-2xl"></i></button>
+            
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 orange-bg rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl shadow-xl shadow-orange-200">
+                    <i class="fa fa-user-lock"></i>
+                </div>
+                <h3 class="text-2xl font-black">User Login</h3>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Access your private station</p>
+            </div>
 
             <div class="space-y-4">
-                <input id="uName" type="text" placeholder="Username" class="w-full bg-gray-50 p-4 rounded-2xl outline-none border border-transparent focus:border-orange-500 font-medium text-sm">
-                <input id="uPass" type="password" placeholder="Password" class="w-full bg-gray-50 p-4 rounded-2xl outline-none border border-transparent focus:border-orange-500 font-medium text-sm">
-                <p id="errorMsg" class="text-red-500 text-[10px] font-bold uppercase hidden">Wrong Username or Password!</p>
-                <button onclick="handleLogin()" class="w-full orange-bg text-white p-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-orange-200 active:scale-95 transition">
-                    Access Dashboard
-                </button>
+                <input id="uName" type="text" placeholder="Username" class="w-full bg-gray-50 p-4 rounded-2xl outline-none border border-transparent focus:border-orange-500 text-sm font-medium">
+                <input id="uPass" type="password" placeholder="Password" class="w-full bg-gray-50 p-4 rounded-2xl outline-none border border-transparent focus:border-orange-500 text-sm font-medium">
+                <button onclick="handleLogin()" class="w-full orange-bg text-white p-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-orange-200 active:scale-95 transition">Sign In</button>
+                <button id="logoutBtn" onclick="handleLogout()" class="hidden w-full bg-red-100 text-red-600 p-4 rounded-2xl font-black uppercase tracking-widest text-xs">Logout</button>
             </div>
         </div>
     </div>
 
-    <!-- Main Dashboard (লগইন করার পর এটি দেখাবে) -->
-    <div id="dashboard" class="hidden-content">
-        <!-- Top Header -->
-        <header class="p-4 flex justify-between items-center bg-white/50 sticky top-0 z-50 backdrop-blur-md">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 orange-bg rounded-full flex items-center justify-center text-white">
-                    <i class="fa fa-tv"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-black tracking-tight uppercase">Home Air <span class="text-[10px] orange-text italic">TV</span></h1>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <button onclick="handleLogout()" class="text-gray-400 hover:text-red-500 transition"><i class="fa fa-sign-out-alt"></i></button>
-                <img src="https://i.pravatar.cc/150?u=robiul" class="w-10 h-10 rounded-full border-2 border-orange-500">
-            </div>
-        </header>
-
-        <!-- Welcome Section -->
-        <section class="px-6 py-6">
-            <div class="inline-block bg-orange-50 text-orange-600 px-4 py-1 rounded-full text-[10px] font-bold uppercase mb-4 border border-orange-100">
-                <i class="fa fa-circle text-[6px] mr-1"></i> System Online
-            </div>
-            <h2 class="text-3xl font-black">Welcome back,<br><span id="displayUser" class="orange-text italic">User!</span> 👋</h2>
-        </section>
-
-        <!-- Grid Buttons -->
-        <section class="px-6 grid grid-cols-2 gap-4 my-4">
-            <button class="btn-3d bg-blue-500 text-white p-5 rounded-2xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-blue-50">
-                <i class="fa fa-tv"></i> Live TV
-            </button>
-            <button class="btn-3d bg-emerald-500 text-white p-5 rounded-2xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-emerald-50">
-                <i class="fa fa-trophy"></i> Sports TV
-            </button>
-            <button class="btn-3d bg-indigo-500 text-white p-5 rounded-2xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-indigo-50">
-                <i class="fa fa-film"></i> Movies
-            </button>
-            <button class="btn-3d bg-orange-500 text-white p-5 rounded-2xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-orange-50">
-                <i class="fa fa-wand-magic-sparkles"></i> Anime
-            </button>
-        </section>
-
-        <!-- Time -->
-        <section class="px-6 mt-10 text-center">
-            <div class="bg-gray-50 p-10 rounded-[40px] border border-gray-100 shadow-inner">
-                <p class="text-[8px] text-gray-400 font-black uppercase tracking-[0.3em] mb-2">Local Time</p>
-                <h3 id="clock" class="text-4xl font-black orange-text italic">00:00:00 PM</h3>
-            </div>
-        </section>
-
-        <!-- Bottom Nav -->
-        <nav class="fixed bottom-0 left-0 right-0 p-4 flex justify-between items-center bg-white/80 backdrop-blur-md border-t border-gray-100">
-            <div class="flex flex-col items-center orange-text"><i class="fa fa-th-large text-xl"></i><span class="text-[8px] font-bold uppercase">Home</span></div>
-            <div class="text-gray-300"><i class="fa fa-tv text-xl"></i></div>
-            <div class="text-gray-300"><i class="fa fa-film text-xl"></i></div>
-            <div class="text-gray-300"><i class="fa fa-heart text-xl"></i></div>
-            <div class="text-gray-300"><i class="fa fa-user text-xl"></i></div>
-        </nav>
-    </div>
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 p-4 flex justify-between items-center bg-white/80 backdrop-blur-md border-t border-gray-100 z-50">
+        <div class="flex flex-col items-center gap-1 orange-text"><i class="fa fa-th-large text-xl"></i><span class="text-[8px] font-black uppercase">Dashboard</span></div>
+        <div class="flex flex-col items-center gap-1 text-gray-300"><i class="fa fa-tv text-xl"></i></div>
+        <div class="flex flex-col items-center gap-1 text-gray-300"><i class="fa fa-compass text-xl"></i></div>
+        <div class="flex flex-col items-center gap-1 text-gray-300"><i class="fa fa-user text-xl"></i></div>
+    </nav>
 
     <script>
-        // আপনার পার্সোনাল আইডি এবং পাসওয়ার্ড এখানে পরিবর্তন করতে পারেন
-        const CORRECT_USER = "admin";
-        const CORRECT_PASS = "1234";
+        // পার্সোনাল লগইন ডাটা
+        const ADMIN_USER = "admin";
+        const ADMIN_PASS = "1234";
+
+        // প্রোফাইল আইকনে ক্লিক করলে যা হবে
+        function handleProfileClick() {
+            const modal = document.getElementById('loginModal');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const isLoggedIn = localStorage.getItem('tv_logged') === 'true';
+
+            modal.classList.remove('hidden');
+            
+            if(isLoggedIn) {
+                logoutBtn.classList.remove('hidden'); // লগইন থাকলে লগআউট বাটন দেখাবে
+            } else {
+                logoutBtn.classList.add('hidden');
+            }
+        }
 
         function handleLogin() {
             const user = document.getElementById('uName').value;
             const pass = document.getElementById('uPass').value;
-            const error = document.getElementById('errorMsg');
 
-            if (user === CORRECT_USER && pass === CORRECT_PASS) {
-                localStorage.setItem('tv_access', 'true');
-                localStorage.setItem('tv_user', user);
-                checkAccess();
+            if(user === ADMIN_USER && pass === ADMIN_PASS) {
+                localStorage.setItem('tv_logged', 'true');
+                localStorage.setItem('tv_name', user);
+                location.reload();
             } else {
-                error.classList.remove('hidden');
-            }
-        }
-
-        function checkAccess() {
-            const hasAccess = localStorage.getItem('tv_access');
-            const user = localStorage.getItem('tv_user');
-            
-            if (hasAccess === 'true') {
-                document.getElementById('loginPage').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden-content');
-                document.getElementById('displayUser').innerText = user.toUpperCase() + "!";
-            } else {
-                document.getElementById('loginPage').classList.remove('hidden');
-                document.getElementById('dashboard').classList.add('hidden-content');
+                alert("Wrong Username or Password!");
             }
         }
 
         function handleLogout() {
-            localStorage.removeItem('tv_access');
-            localStorage.removeItem('tv_user');
+            localStorage.removeItem('tv_logged');
+            localStorage.removeItem('tv_name');
             location.reload();
         }
 
-        // ঘড়ি ফাংশন
+        function closeModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+
+        function checkStatus() {
+            const logged = localStorage.getItem('tv_logged') === 'true';
+            const name = localStorage.getItem('tv_name');
+            const display = document.getElementById('displayUser');
+            const badge = document.getElementById('userBadge');
+            const indicator = document.getElementById('loginIndicator');
+            const profileImg = document.getElementById('profileImg');
+
+            if(logged) {
+                display.innerText = name.toUpperCase() + "!";
+                badge.classList.remove('hidden');
+                indicator.innerHTML = '<i class="fa fa-check text-[8px] text-white"></i>';
+                indicator.classList.replace('bg-gray-200', 'bg-emerald-500');
+                profileImg.src = "https://i.pravatar.cc/150?u=robiul"; // লগইন করলে আসল ছবি
+            } else {
+                display.innerText = "Guest User!";
+                badge.classList.add('hidden');
+            }
+        }
+
         function updateClock() {
             const now = new Date();
             let h = now.getHours();
@@ -150,7 +185,7 @@
         }
 
         setInterval(updateClock, 1000);
-        window.onload = checkAccess;
+        window.onload = () => { checkStatus(); updateClock(); };
     </script>
 </body>
 </html>
